@@ -180,6 +180,7 @@ $paginaAtual = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $paginasLiberadas = [
     'login.php',
     'cadastro.php',
+    'redefinir_senha.php',
     'logout.php',
     'cobranca.php',
     'cardapio.php',

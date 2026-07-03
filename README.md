@@ -11,6 +11,8 @@ Aplicativo PHP para controle de receitas, estoque, clientes, pedidos e cardapio 
 5. Acesse `http://localhost/doce-app/` no navegador.
 6. Crie sua conta na tela de cadastro e entre com e-mail e senha.
 
+Para bancos criados antes do login real, execute `database_updates.sql` para adicionar os campos de usuario mais recentes, incluindo celular/WhatsApp e senha.
+
 ## Modulos
 
 - Dashboard

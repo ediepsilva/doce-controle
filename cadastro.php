@@ -9,15 +9,17 @@ if (doce_usuario_logado()) {
 $erro = '';
 $nome = '';
 $email = '';
+$whatsapp = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim((string)($_POST['nome'] ?? ''));
     $email = trim((string)($_POST['email'] ?? ''));
+    $whatsapp = trim((string)($_POST['whatsapp'] ?? ''));
     $senha = (string)($_POST['senha'] ?? '');
     $confirmarSenha = (string)($_POST['confirmar_senha'] ?? '');
 
-    if ($nome === '' || $email === '' || $senha === '') {
-        $erro = 'Preencha nome, e-mail e senha.';
+    if ($nome === '' || $email === '' || $whatsapp === '' || $senha === '') {
+        $erro = 'Preencha nome, e-mail, celular e senha.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $erro = 'Informe um e-mail valido.';
     } elseif (strlen($senha) < 6) {
@@ -33,11 +35,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->fetch()) {
             $erro = 'Ja existe uma conta com este e-mail.';
         } else {
-            $stmt = $pdo->prepare(
-                "INSERT INTO users (nome, email, password_hash, status, plano, criado_em)
-                 VALUES (?, ?, ?, 'ativo', 'ativo', NOW())"
-            );
-            $stmt->execute([$nome, $email, doce_hash_senha($senha)]);
+            $temWhatsapp = doce_coluna_existe($pdo, 'users', 'whatsapp');
+            if ($temWhatsapp) {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO users (nome, email, whatsapp, password_hash, status, plano, criado_em)
+                     VALUES (?, ?, ?, ?, 'ativo', 'ativo', NOW())"
+                );
+                $stmt->execute([$nome, $email, $whatsapp, doce_hash_senha($senha)]);
+            } else {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO users (nome, email, password_hash, status, plano, criado_em)
+                     VALUES (?, ?, ?, 'ativo', 'ativo', NOW())"
+                );
+                $stmt->execute([$nome, $email, doce_hash_senha($senha)]);
+            }
 
             $_SESSION['user_id'] = intval($pdo->lastInsertId());
             $_SESSION['user_nome'] = $nome;
@@ -83,14 +94,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label class="form-label fw-bold">E-mail</label>
                         <input type="email" name="email" class="form-control form-control-lg" value="<?= htmlspecialchars($email) ?>" required>
                     </div>
+                    <div>
+                        <label class="form-label fw-bold">Celular / WhatsApp</label>
+                        <input type="tel" name="whatsapp" class="form-control form-control-lg" value="<?= htmlspecialchars($whatsapp) ?>" placeholder="(00) 00000-0000" required>
+                    </div>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-bold">Senha</label>
-                            <input type="password" name="senha" class="form-control form-control-lg" minlength="6" required>
+                            <div class="input-group input-group-lg">
+                                <input type="password" name="senha" id="senha" class="form-control" minlength="6" required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="senha" aria-label="Mostrar senha">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-bold">Confirmar senha</label>
-                            <input type="password" name="confirmar_senha" class="form-control form-control-lg" minlength="6" required>
+                            <div class="input-group input-group-lg">
+                                <input type="password" name="confirmar_senha" id="confirmar_senha" class="form-control" minlength="6" required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirmar_senha" aria-label="Mostrar senha">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-danger btn-lg">
@@ -105,6 +130,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </main>
+    <script>
+        document.querySelectorAll('.toggle-password').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.target);
+                const icon = button.querySelector('i');
+                const showing = input.type === 'text';
+                input.type = showing ? 'password' : 'text';
+                icon.className = showing ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+        });
+    </script>
     <script src="assets/pwa.js"></script>
 </body>
 </html>

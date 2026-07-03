@@ -22,14 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email]);
         $usuario = $stmt->fetch();
 
-        if ($usuario && doce_verificar_senha($senha, $usuario['password_hash'])) {
+        if ($usuario && empty($usuario['password_hash'])) {
+            $erro = 'Sua conta ainda nao tem senha cadastrada. Use "Esqueci minha senha" para criar uma nova senha.';
+        } elseif ($usuario && doce_verificar_senha($senha, $usuario['password_hash'])) {
             $_SESSION['user_id'] = intval($usuario['id']);
             $_SESSION['user_nome'] = $usuario['nome'];
             header('Location: index.php');
             exit;
+        } else {
+            $erro = 'E-mail ou senha invalidos.';
         }
-
-        $erro = 'E-mail ou senha invalidos.';
     }
 }
 ?>
@@ -67,12 +69,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div>
                         <label class="form-label fw-bold">Senha</label>
-                        <input type="password" name="senha" class="form-control form-control-lg" required>
+                        <div class="input-group input-group-lg">
+                            <input type="password" name="senha" id="senha" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary toggle-password" data-target="senha" aria-label="Mostrar senha">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-danger btn-lg">
                         <i class="bi bi-box-arrow-in-right"></i> Entrar
                     </button>
                 </form>
+
+                <div class="text-center mt-3">
+                    <a href="redefinir_senha.php" class="fw-bold pink-shock">Esqueci minha senha</a>
+                </div>
 
                 <div class="text-center mt-4">
                     <span class="text-muted">Ainda nao tem conta?</span>
@@ -81,6 +92,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </main>
+    <script>
+        document.querySelectorAll('.toggle-password').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.target);
+                const icon = button.querySelector('i');
+                const showing = input.type === 'text';
+                input.type = showing ? 'password' : 'text';
+                icon.className = showing ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+        });
+    </script>
     <script src="assets/pwa.js"></script>
 </body>
 </html>
