@@ -1,0 +1,198 @@
+body {
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)), url("delicias-da-mara-logo.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: min(78vw, 760px) auto;
+    opacity: 0.26;
+}
+
+body > * {
+    position: relative;
+    z-index: 1;
+}
+
+.modal-body,
+.card,
+.modal-content,
+.table-responsive,
+.alert,
+.list-group-item {
+    position: relative;
+}
+
+.navbar,
+.bg-success,
+.bg-primary,
+.bg-warning,
+.bg-danger,
+.bg-info,
+.btn-success,
+.btn-primary,
+.btn-warning,
+.btn-danger,
+.btn-info,
+.badge.bg-success,
+.badge.bg-primary,
+.badge.bg-warning,
+.badge.bg-danger,
+.badge.bg-info {
+    background-color: #ff007f !important;
+    border-color: #ff007f !important;
+    color: #ffffff !important;
+}
+
+.border-success,
+.border-primary,
+.border-warning,
+.border-danger,
+.border-info,
+.card,
+.alert,
+.form-control,
+.form-select,
+.dropdown-menu {
+    border-color: #ff007f !important;
+}
+
+.card,
+.card-footer,
+.dropdown-menu,
+.form-control,
+.form-select,
+.modal-content,
+.table,
+.alert {
+    background-color: rgba(255, 247, 251, 0.94) !important;
+}
+
+.card-title,
+.navbar-brand,
+.dropdown-item,
+.form-label,
+.alert strong,
+.table th,
+.text-success,
+.text-primary,
+.text-warning,
+.text-danger,
+.text-info {
+    color: #ff007f !important;
+}
+
+.btn-outline-light,
+.btn-outline-dark,
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-info {
+    border-color: #ff007f !important;
+    color: #ff007f !important;
+    background-color: #fff7fb !important;
+}
+
+.navbar .btn,
+.navbar .btn-outline-light,
+.navbar .btn-outline-dark,
+.navbar .btn-outline-secondary,
+.navbar .btn-outline-primary,
+.navbar .btn-outline-success,
+.navbar .btn-outline-warning,
+.navbar .btn-outline-danger,
+.navbar .btn-outline-info {
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-light:hover,
+.btn-outline-dark:hover,
+.btn-outline-secondary:hover,
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-danger:hover,
+.btn-outline-info:hover,
+.dropdown-item:hover {
+    background-color: #ff007f !important;
+    color: #ffffff !important;
+}
+
+.navbar .btn:hover,
+.navbar .btn-outline-light:hover,
+.navbar .btn-outline-dark:hover,
+.navbar .btn-outline-secondary:hover,
+.navbar .btn-outline-primary:hover,
+.navbar .btn-outline-success:hover,
+.navbar .btn-outline-warning:hover,
+.navbar .btn-outline-danger:hover,
+.navbar .btn-outline-info:hover {
+    background-color: #ffffff !important;
+    color: #ff007f !important;
+}
+
+.form-control,
+.form-select {
+    color: #ff007f !important;
+    font-weight: 600;
+    min-height: 48px;
+    font-size: 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #ff007f !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 0, 127, 0.2) !important;
+}
+
+.btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.btn-sm {
+    min-height: 40px;
+}
+
+.btn-lg,
+.navbar .btn,
+.card-footer .btn {
+    min-height: 52px;
+    font-size: 1rem;
+}
+
+.table td,
+.table th {
+    padding: 0.9rem;
+}
+
+.receita-logo-teste {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)), url("delicias-da-mara-logo.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: contain !important;
+    color: transparent !important;
+    min-height: 190px !important;
+}
+
+@media (max-width: 767px) {
+    body::before {
+        background-size: 92vw auto;
+        opacity: 0.2;
+    }
+}
