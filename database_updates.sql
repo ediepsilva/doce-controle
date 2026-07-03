@@ -1,6 +1,12 @@
 -- Atualizacoes de banco para os RNF/RN do Doce Controle.
 -- Execute no phpMyAdmin ou no MySQL do XAMPP quando o banco estiver ligado.
 
+CREATE DATABASE IF NOT EXISTS doce_controle
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE doce_controle;
+
 ALTER TABLE estoque
     MODIFY preco_unitario DECIMAL(12,6) NOT NULL DEFAULT 0,
     MODIFY quantidade_atual DECIMAL(12,3) NOT NULL DEFAULT 0,
@@ -21,3 +27,7 @@ ALTER TABLE receitas
     ADD COLUMN IF NOT EXISTS imagem_produto VARCHAR(255) NULL,
     ADD COLUMN IF NOT EXISTS mostrar_cardapio TINYINT(1) NOT NULL DEFAULT 1,
     ADD COLUMN IF NOT EXISTS descricao_publica TEXT NULL;
+
+UPDATE users
+SET nome = COALESCE(NULLIF(nome_confeitaria, ''), NULLIF(nome, ''), 'Usuario')
+WHERE nome = 'Usuario' AND nome_confeitaria IS NOT NULL;
