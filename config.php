@@ -68,10 +68,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Simulador de Login: Forçamos o ID 1
-// IMPORTANTE: Certifique-se de que existe um usuário com ID 1 na sua tabela 'users'
-$_SESSION['user_id'] = 1; 
-
 function doce_tabela_existe($pdo, $tabela)
 {
     try {
@@ -100,6 +96,24 @@ function doce_coluna_existe($pdo, $tabela, $coluna)
     } catch (Exception $e) {
         return false;
     }
+}
+
+function doce_usuario_logado()
+{
+    return !empty($_SESSION['user_id']);
+}
+
+function doce_usuario_atual($pdo)
+{
+    if (!doce_usuario_logado() || !doce_tabela_existe($pdo, 'users')) {
+        return null;
+    }
+
+    $stmt = $pdo->prepare("SELECT id, nome, email, status, plano FROM users WHERE id = ? LIMIT 1");
+    $stmt->execute([$_SESSION['user_id']]);
+    $usuario = $stmt->fetch();
+
+    return $usuario ?: null;
 }
 
 function doce_garantir_coluna_imagem_receita($pdo)
@@ -163,11 +177,25 @@ function doce_usuario_inativo($pdo, $user_id)
 }
 
 $paginaAtual = basename($_SERVER['SCRIPT_NAME'] ?? '');
-$paginasLiberadas = ['cobranca.php', 'testar_conexao.php'];
+$paginasLiberadas = [
+    'login.php',
+    'cadastro.php',
+    'logout.php',
+    'cobranca.php',
+    'cardapio.php',
+    'api_receitas.php',
+    'api_receitas_publicas.php',
+    'testar_conexao.php',
+];
 
 doce_garantir_coluna_imagem_receita($pdo);
 
-if (!in_array($paginaAtual, $paginasLiberadas, true) && doce_usuario_inativo($pdo, $_SESSION['user_id'])) {
+if (!in_array($paginaAtual, $paginasLiberadas, true) && !doce_usuario_logado()) {
+    header('Location: login.php');
+    exit;
+}
+
+if (doce_usuario_logado() && !in_array($paginaAtual, $paginasLiberadas, true) && doce_usuario_inativo($pdo, $_SESSION['user_id'])) {
     header('Location: cobranca.php');
     exit;
 }

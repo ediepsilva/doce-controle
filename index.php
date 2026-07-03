@@ -2,6 +2,7 @@
 require_once 'config.php';
 
 $user_id = $_SESSION['user_id'];
+$usuarioAtual = doce_usuario_atual($pdo);
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM estoque WHERE user_id = ?");
 $stmt->execute([$user_id]);
@@ -39,9 +40,17 @@ $pedidosAbertos = $stmt->fetchColumn();
 <nav class="navbar navbar-dark bg-success mb-4 shadow-sm">
     <div class="container-fluid">
         <span class="navbar-brand fw-bold"><i class="bi bi-shop-window"></i> Doce Controle</span>
-        <a href="cardapio.php" class="btn btn-outline-light btn-sm" target="_blank">
-            <i class="bi bi-box-arrow-up-right"></i> Ver Cardapio
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($usuarioAtual): ?>
+                <span class="text-white small d-none d-md-inline">Ola, <?= htmlspecialchars($usuarioAtual['nome']) ?></span>
+            <?php endif; ?>
+            <a href="cardapio.php" class="btn btn-outline-light btn-sm" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i> Ver Cardapio
+            </a>
+            <a href="logout.php" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </a>
+        </div>
     </div>
 </nav>
 
