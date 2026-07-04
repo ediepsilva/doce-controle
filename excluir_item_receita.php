@@ -13,8 +13,8 @@ if (isset($_GET['id'], $_GET['receita_id'])) {
     $receita = $stmt->fetch();
 
     if ($receita) {
-        $stmt = $pdo->prepare("DELETE FROM receitas_itens WHERE id = ?");
-        $stmt->execute([$id]);
+        $stmt = $pdo->prepare("DELETE FROM receitas_itens WHERE id = ? AND receita_id = ?");
+        $stmt->execute([$id, $receita_id]);
     }
 }
 

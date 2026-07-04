@@ -1,9 +1,46 @@
 <?php
 require_once 'config.php';
 
-$user_id = $_SESSION['user_id'] ?? 1;
-$nomeMarca = 'Delicias da Mara';
-$whatsapp = '5521973453004';
+$cardapioUserId = intval($_GET['user_id'] ?? ($_SESSION['user_id'] ?? 1));
+if ($cardapioUserId <= 0) {
+    $cardapioUserId = 1;
+}
+
+$temWhatsappUsuario = doce_coluna_existe($pdo, 'users', 'whatsapp');
+$camposUsuario = $temWhatsappUsuario ? 'id, nome, whatsapp' : 'id, nome';
+$stmtUsuario = $pdo->prepare("SELECT $camposUsuario FROM users WHERE id = ? LIMIT 1");
+$stmtUsuario->execute([$cardapioUserId]);
+$usuarioCardapio = $stmtUsuario->fetch();
+
+if (!$usuarioCardapio) {
+    http_response_code(404);
+    ?>
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cardapio nao encontrado</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <main class="container min-vh-100 d-flex align-items-center justify-content-center">
+            <div class="card shadow-sm" style="max-width: 560px;">
+                <div class="card-body p-4 text-center">
+                    <h1 class="h4 fw-bold">Cardapio nao encontrado</h1>
+                    <p class="text-muted mb-0">Confira se o link esta correto ou solicite um novo link para a confeitaria.</p>
+                </div>
+            </div>
+        </main>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+$user_id = intval($usuarioCardapio['id']);
+$nomeMarca = trim((string)($usuarioCardapio['nome'] ?? '')) ?: 'Doce Controle';
+$whatsapp = trim((string)($usuarioCardapio['whatsapp'] ?? ''));
 $temImagemReceita = doce_coluna_existe($pdo, 'receitas', 'imagem_produto');
 $temMostrarCardapio = doce_coluna_existe($pdo, 'receitas', 'mostrar_cardapio');
 $temDescricaoPublica = doce_coluna_existe($pdo, 'receitas', 'descricao_publica');

@@ -67,7 +67,7 @@ $historico = $stmt->fetchAll();
                     <form action="salvar_compra_insumo.php" method="POST">
                         <input type="hidden" name="estoque_id" value="<?= $item['id'] ?>">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Preço de compra</label>
+                            <label class="form-label fw-bold">Valor pago na compra</label>
                             <input type="number" step="0.01" name="preco_compra" class="form-control" required>
                         </div>
                         <div class="mb-3">

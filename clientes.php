@@ -74,6 +74,9 @@ $clientes = $stmt->fetchAll();
                                     <a href="pedidos.php?cliente_id=<?= $c['id'] ?>" class="btn btn-outline-secondary btn-sm" title="Ver histórico de compras">
                                         <i class="bi bi-clock-history"></i>
                                     </a>
+                                    <a href="editar_cliente.php?id=<?= $c['id'] ?>" class="btn btn-outline-primary btn-sm" title="Editar cliente">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     <a href="excluir_cliente.php?id=<?= $c['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Excluir este cliente e seus dados?')">
                                         <i class="bi bi-trash"></i>
                                     </a>

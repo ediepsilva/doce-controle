@@ -22,6 +22,17 @@ Para bancos criados antes do login real, execute `database_updates.sql` para adi
 - Pedidos
 - Cardapio publico
 
+## Fluxo principal
+
+1. Cadastre uma conta e entre no sistema.
+2. Complete o estoque com ingredientes, quantidades compradas e valores pagos.
+3. Crie receitas e adicione ingredientes para calcular custos automaticamente.
+4. Cadastre clientes e registre encomendas.
+5. Avance o status dos pedidos no painel de pedidos.
+6. Divulgue o cardapio publico da conta pelo link `cardapio.php?user_id=SEU_ID`.
+
+O link publico do cardapio tambem aparece no dashboard depois do login.
+
 ## GitHub
 
 Depois de alterar o projeto:
