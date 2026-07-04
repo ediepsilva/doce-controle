@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once 'config.php';
 $user_id = $_SESSION['user_id'];
 $filterCliente = isset($_GET['cliente_id']) ? intval($_GET['cliente_id']) : 0;
@@ -33,6 +33,12 @@ if ($filterCliente) {
 
 $board = array_fill_keys($statuses, []);
 foreach ($pedidos as $pedido) {
+    if (strpos($pedido['status'], 'Produ') !== false) {
+        $pedido['status'] = 'Em Produção';
+    }
+    if (!isset($board[$pedido['status']])) {
+        $pedido['status'] = 'Pendente';
+    }
     $board[$pedido['status']][] = $pedido;
 }
 
@@ -156,7 +162,7 @@ $receitas = $stmt->fetchAll();
                 <p class="text-muted mb-0">Acompanhe prazos, valores em aberto e avance cada encomenda pelo fluxo.</p>
                 <?php if ($clienteFiltrado): ?>
                     <div class="mt-2">
-                        <span class="badge bg-secondary">Filtrando histórico de: <?= htmlspecialchars($clienteFiltrado) ?></span>
+                        <span class="badge bg-secondary">Filtrando histÃ³rico de: <?= htmlspecialchars($clienteFiltrado) ?></span>
                         <a href="pedidos.php" class="btn btn-sm btn-outline-secondary ms-2">Limpar filtro</a>
                     </div>
                 <?php endif; ?>
@@ -253,11 +259,30 @@ $receitas = $stmt->fetchAll();
                                     <?php endif; ?>
                                 </div>
                                 <div class="card-footer bg-white border-top-0">
-                                    <?php if ($nextStatus): ?>
-                                        <a href="atualizar_status_pedido.php?id=<?= $pedido['id'] ?>&status=<?= urlencode($nextStatus) ?>" class="btn btn-sm btn-outline-primary w-100">Mover para <?= $nextStatus ?></a>
-                                    <?php else: ?>
-                                        <span class="badge bg-success w-100">Entregue</span>
-                                    <?php endif; ?>
+                                    <div class="d-grid gap-2">
+                                        <?php if ($nextStatus): ?>
+                                            <form action="atualizar_status_pedido.php" method="POST">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                                                <input type="hidden" name="id" value="<?= intval($pedido['id']) ?>">
+                                                <input type="hidden" name="status" value="<?= htmlspecialchars($nextStatus) ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary w-100">Mover para <?= htmlspecialchars($nextStatus) ?></button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="badge bg-success w-100">Entregue</span>
+                                        <?php endif; ?>
+                                        <div class="btn-group" role="group">
+                                            <a href="editar_pedido.php?id=<?= intval($pedido['id']) ?>" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                            <form action="excluir_pedido.php" method="POST" class="d-inline" onsubmit="return confirm('Excluir este pedido?')">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                                                <input type="hidden" name="id" value="<?= intval($pedido['id']) ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" <?= intval($pedido['estoque_baixado'] ?? 0) === 1 ? 'disabled' : '' ?>>
+                                                    <i class="bi bi-trash"></i> Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -272,6 +297,7 @@ $receitas = $stmt->fetchAll();
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form action="salvar_pedido.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title"><i class="bi bi-cart-plus"></i> Nova Encomenda</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>

@@ -42,10 +42,13 @@ $pedidosAbertos = $stmt->fetchColumn();
         <span class="navbar-brand fw-bold"><i class="bi bi-shop-window"></i> Doce Controle</span>
         <div class="d-flex align-items-center gap-2">
             <?php if ($usuarioAtual): ?>
-                <span class="text-white small d-none d-md-inline">Ola, <?= htmlspecialchars($usuarioAtual['nome']) ?></span>
+                <span class="text-white small d-none d-md-inline">Olá, <?= htmlspecialchars($usuarioAtual['nome']) ?></span>
             <?php endif; ?>
+            <a href="perfil.php" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-person-gear"></i> Perfil
+            </a>
             <a href="cardapio.php?user_id=<?= urlencode((string)$user_id) ?>" class="btn btn-outline-light btn-sm" target="_blank">
-                <i class="bi bi-box-arrow-up-right"></i> Ver Cardapio
+                <i class="bi bi-box-arrow-up-right"></i> Ver Cardápio
             </a>
             <a href="logout.php" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-box-arrow-right"></i> Sair
@@ -136,8 +139,8 @@ $pedidosAbertos = $stmt->fetchColumn();
         <div class="col-12">
             <div class="alert alert-info" role="alert">
                 <strong>Bem-vinda!</strong> Use este painel para navegar rapidamente entre estoque, clientes, receitas e pedidos.
-                O cardapio publico ja pode ser divulgado para seus clientes:
-                <a href="cardapio.php?user_id=<?= urlencode((string)$user_id) ?>" target="_blank" class="alert-link">abrir link publico</a>.
+                O cardápio público já pode ser divulgado para seus clientes:
+                <a href="cardapio.php?user_id=<?= urlencode((string)$user_id) ?>" target="_blank" class="alert-link">abrir link público</a>.
             </div>
         </div>
     </div>

@@ -2,6 +2,11 @@
 require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!doce_validar_csrf()) {
+        header("Location: clientes.php");
+        exit;
+    }
+
     $nome = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_SPECIAL_CHARS);
     $whatsapp = filter_input(INPUT_POST, 'whatsapp', FILTER_SANITIZE_SPECIAL_CHARS);
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);

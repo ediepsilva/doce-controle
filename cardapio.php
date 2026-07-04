@@ -7,7 +7,10 @@ if ($cardapioUserId <= 0) {
 }
 
 $temWhatsappUsuario = doce_coluna_existe($pdo, 'users', 'whatsapp');
-$camposUsuario = $temWhatsappUsuario ? 'id, nome, whatsapp' : 'id, nome';
+$temLogoUsuario = doce_coluna_existe($pdo, 'users', 'logo_marca');
+$campoWhatsappUsuario = $temWhatsappUsuario ? 'whatsapp' : "'' AS whatsapp";
+$campoLogoUsuario = $temLogoUsuario ? 'logo_marca' : "'' AS logo_marca";
+$camposUsuario = "id, nome, $campoWhatsappUsuario, $campoLogoUsuario";
 $stmtUsuario = $pdo->prepare("SELECT $camposUsuario FROM users WHERE id = ? LIMIT 1");
 $stmtUsuario->execute([$cardapioUserId]);
 $usuarioCardapio = $stmtUsuario->fetch();
@@ -41,6 +44,10 @@ if (!$usuarioCardapio) {
 $user_id = intval($usuarioCardapio['id']);
 $nomeMarca = trim((string)($usuarioCardapio['nome'] ?? '')) ?: 'Doce Controle';
 $whatsapp = trim((string)($usuarioCardapio['whatsapp'] ?? ''));
+$logoMarca = trim((string)($usuarioCardapio['logo_marca'] ?? ''));
+$imagemMarca = $logoMarca !== '' && is_file(__DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $logoMarca))
+    ? $logoMarca
+    : 'assets/delicias-da-mara-logo.jpg';
 $temImagemReceita = doce_coluna_existe($pdo, 'receitas', 'imagem_produto');
 $temMostrarCardapio = doce_coluna_existe($pdo, 'receitas', 'mostrar_cardapio');
 $temDescricaoPublica = doce_coluna_existe($pdo, 'receitas', 'descricao_publica');
@@ -93,12 +100,14 @@ function cardapio_link_whatsapp($telefone, $produto)
 
 function cardapio_imagem_produto($produto)
 {
+    global $imagemMarca;
+
     $imagem = trim((string)($produto['imagem_produto'] ?? ''));
     if ($imagem !== '' && is_file(__DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $imagem))) {
         return $imagem;
     }
 
-    return 'assets/delicias-da-mara-logo.jpg';
+    return $imagemMarca;
 }
 ?>
 
@@ -150,7 +159,7 @@ function cardapio_imagem_produto($produto)
             padding: 6rem 0 3rem;
             background:
                 linear-gradient(90deg, rgba(255, 247, 251, 0.96), rgba(255, 247, 251, 0.68), rgba(255, 247, 251, 0.2)),
-                url("assets/delicias-da-mara-logo.jpg");
+                url("<?= htmlspecialchars($imagemMarca) ?>");
             background-repeat: no-repeat;
             background-position: right 8% center;
             background-size: min(48vw, 520px) auto;
@@ -244,7 +253,7 @@ function cardapio_imagem_produto($produto)
             min-height: 170px;
             background:
                 linear-gradient(135deg, rgba(255, 0, 127, 0.1), rgba(255, 209, 102, 0.32)),
-                url("assets/delicias-da-mara-logo.jpg");
+                url("<?= htmlspecialchars($imagemMarca) ?>");
             background-position: center;
             background-size: contain;
             background-repeat: no-repeat;
@@ -297,7 +306,7 @@ function cardapio_imagem_produto($produto)
                 padding: 5.5rem 0 2.5rem;
                 background:
                     linear-gradient(rgba(255, 247, 251, 0.92), rgba(255, 247, 251, 0.92)),
-                    url("assets/delicias-da-mara-logo.jpg");
+                    url("<?= htmlspecialchars($imagemMarca) ?>");
                 background-repeat: no-repeat;
                 background-position: center 5.2rem;
                 background-size: 72vw auto;
@@ -313,7 +322,7 @@ function cardapio_imagem_produto($produto)
     <nav class="navbar fixed-top">
         <div class="container d-flex justify-content-between align-items-center gap-3">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-decoration-none" href="#topo">
-                <img src="assets/delicias-da-mara-logo.jpg" class="brand-logo" alt="Logo <?= htmlspecialchars($nomeMarca) ?>">
+                <img src="<?= htmlspecialchars($imagemMarca) ?>" class="brand-logo" alt="Logo <?= htmlspecialchars($nomeMarca) ?>">
                 <span class="text-dark"><?= htmlspecialchars($nomeMarca) ?></span>
             </a>
             <a href="#cardapio" class="btn btn-outline-pink btn-sm">

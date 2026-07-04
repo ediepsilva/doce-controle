@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once 'config.php';
 
 function garantir_coluna_estoque_baixado($pdo)
@@ -41,9 +41,9 @@ function baixar_estoque_pedido($pdo, $pedido)
     $stmt->execute([intval($pedido['id']), intval($pedido['user_id'])]);
 }
 
-if (isset($_GET['id'], $_GET['status'])) {
-    $id = intval($_GET['id']);
-    $status = $_GET['status'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf() && isset($_POST['id'], $_POST['status'])) {
+    $id = intval($_POST['id']);
+    $status = $_POST['status'];
     $user_id = $_SESSION['user_id'];
     $valid = ['Pendente', 'Em Produção', 'Pronto', 'Entregue'];
 

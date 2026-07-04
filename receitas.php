@@ -604,7 +604,7 @@ function abrirDetalhesReceita(index) {
             </div>
         </div>
         ${faltantesHtml}
-        <div class="receita-logo-teste">Logo da Cliente</div>
+        <div class="receita-logo-teste">Ficha Técnica</div>
         <h6 class="fw-bold pink-shock">Ingredientes</h6>
         ${ingredientes}
         <h6 class="fw-bold pink-shock">Modo de preparo</h6>

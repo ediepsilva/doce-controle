@@ -49,6 +49,7 @@ if (!$cliente) {
                 <div class="card-body p-4">
                     <h1 class="h4 fw-bold mb-3">Dados do cliente</h1>
                     <form action="salvar_cliente.php" method="POST" class="d-grid gap-3">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                         <input type="hidden" name="id" value="<?= intval($cliente['id']) ?>">
                         <div>
                             <label class="form-label fw-bold">Nome</label>
