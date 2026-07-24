@@ -149,6 +149,7 @@ $receitas = $stmt->fetchAll();
         <span class="navbar-brand fw-bold"><i class="bi bi-kanban-fill"></i> Doce Controle - Pedidos</span>
         <div class="d-flex gap-2">
             <a href="index.php" class="btn btn-outline-light btn-sm">Dashboard</a>
+            <a href="cozinha.php" class="btn btn-outline-light btn-sm">Cozinha</a>
             <a href="receitas.php" class="btn btn-outline-light btn-sm">Receitas</a>
         </div>
     </div>

@@ -13,6 +13,41 @@ Aplicativo PHP para controle de receitas, estoque, clientes, pedidos e cardapio 
 
 Para bancos criados antes do login real, execute `database_updates.sql` para adicionar os campos de usuario mais recentes, incluindo celular/WhatsApp e senha.
 
+## Banco online / producao
+
+Para o sistema ficar disponivel sem depender do MySQL do XAMPP, hospede o banco em um servidor MySQL online e configure estas variaveis de ambiente no servidor PHP:
+
+```env
+DB_HOST=host-do-banco
+DB_PORT=3306
+DB_NAME=doce_controle
+DB_USER=usuario_do_banco
+DB_PASS=senha_do_banco
+```
+
+Sem essas variaveis, o projeto continua usando o banco local do XAMPP:
+
+```env
+DB_HOST=localhost
+DB_NAME=doce_controle
+DB_USER=root
+DB_PASS=
+```
+
+Depois de criar o banco online, execute `schema.sql` nele. Se estiver migrando dados locais, exporte o banco pelo phpMyAdmin do XAMPP e importe no banco online.
+
+Em hospedagens que nao permitem configurar variaveis de ambiente pelo painel, crie um arquivo `.env` na raiz do projeto usando `.env.example` como modelo:
+
+```env
+DB_HOST=host-do-banco
+DB_PORT=3306
+DB_NAME=nome_do_banco
+DB_USER=usuario_do_banco
+DB_PASS=senha_do_banco
+```
+
+O arquivo `.env` nao deve ser enviado para o GitHub. Ele fica somente no servidor, com a senha real do banco.
+
 ## Modulos
 
 - Dashboard
@@ -20,6 +55,7 @@ Para bancos criados antes do login real, execute `database_updates.sql` para adi
 - Estoque
 - Clientes
 - Pedidos
+- Cozinha
 - Cardapio publico
 - Perfil da confeitaria
 
@@ -30,8 +66,9 @@ Para bancos criados antes do login real, execute `database_updates.sql` para adi
 3. Complete o estoque com ingredientes, quantidades compradas e valores pagos.
 4. Crie receitas e adicione ingredientes para calcular custos automaticamente.
 5. Cadastre clientes e registre encomendas.
-6. Edite, exclua ou avance o status dos pedidos no painel de pedidos.
-7. Divulgue o cardapio publico da conta pelo link `cardapio.php?user_id=SEU_ID`.
+6. Acompanhe a fila de producao na tela de cozinha.
+7. Edite, exclua ou avance o status dos pedidos no painel de pedidos.
+8. Divulgue o cardapio publico da conta pelo link `cardapio.php?user_id=SEU_ID`.
 
 O link publico do cardapio tambem aparece no dashboard depois do login.
 

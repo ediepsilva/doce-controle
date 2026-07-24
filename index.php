@@ -133,6 +133,23 @@ $pedidosAbertos = $stmt->fetchColumn();
                 </div>
             </div>
         </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-dark">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="card-title">Cozinha</h5>
+                            <p class="card-text text-muted mb-0">Fila de produção</p>
+                        </div>
+                        <span class="badge bg-dark fs-6"><i class="bi bi-fire"></i></span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="cozinha.php" class="btn btn-dark w-100">Abrir Cozinha</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row mt-5">
