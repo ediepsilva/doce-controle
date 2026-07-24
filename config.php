@@ -1,8 +1,49 @@
 <?php
-$host = 'localhost';
-$db   = 'doce_controle';
-$user = 'root';
-$pass = ''; // No XAMPP o padrão é vazio
+function doce_carregar_env($arquivo)
+{
+    if (!is_file($arquivo) || !is_readable($arquivo)) {
+        return;
+    }
+
+    foreach (file($arquivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $linha) {
+        $linha = trim($linha);
+
+        if ($linha === '' || substr($linha, 0, 1) === '#' || strpos($linha, '=') === false) {
+            continue;
+        }
+
+        [$nome, $valor] = explode('=', $linha, 2);
+        $nome = trim($nome);
+        $valor = trim($valor, " \t\n\r\0\x0B\"'");
+
+        if ($nome !== '' && getenv($nome) === false && !array_key_exists($nome, $_ENV)) {
+            $_ENV[$nome] = $valor;
+
+            if (function_exists('putenv')) {
+                @putenv($nome . '=' . $valor);
+            }
+        }
+    }
+}
+
+doce_carregar_env(__DIR__ . DIRECTORY_SEPARATOR . '.env');
+
+function doce_env($nome, $padrao = '')
+{
+    $valor = getenv($nome);
+
+    if ($valor !== false) {
+        return $valor;
+    }
+
+    return array_key_exists($nome, $_ENV) ? $_ENV[$nome] : $padrao;
+}
+
+$host = doce_env('DB_HOST', 'localhost');
+$db   = doce_env('DB_NAME', 'doce_controle');
+$user = doce_env('DB_USER', 'root');
+$pass = doce_env('DB_PASS', '');
+$port = doce_env('DB_PORT', '3306');
 
 if (!defined('DOCE_APP_MULTIPLICADOR_PRECO_SUGERIDO')) {
     define('DOCE_APP_MULTIPLICADOR_PRECO_SUGERIDO', 3);
@@ -19,7 +60,7 @@ function doce_verificar_senha($senha, $hash)
 }
 
 try {
-     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
+     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass);
      // Configuramos o PDO para lançar exceções em caso de erro
      $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
      // Forçamos o retorno dos dados como array associativo (mais fácil de usar)
@@ -109,11 +150,65 @@ function doce_usuario_atual($pdo)
         return null;
     }
 
-    $stmt = $pdo->prepare("SELECT id, nome, email, status, plano FROM users WHERE id = ? LIMIT 1");
+    doce_garantir_colunas_usuario($pdo);
+
+    $stmt = $pdo->prepare("SELECT id, nome, email, whatsapp, logo_marca, status, plano FROM users WHERE id = ? LIMIT 1");
     $stmt->execute([$_SESSION['user_id']]);
     $usuario = $stmt->fetch();
 
     return $usuario ?: null;
+}
+
+function doce_csrf_token()
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+function doce_validar_csrf()
+{
+    $token = (string)($_POST['csrf_token'] ?? '');
+    return $token !== '' && hash_equals((string)($_SESSION['csrf_token'] ?? ''), $token);
+}
+
+function doce_garantir_colunas_usuario($pdo)
+{
+    if (!doce_tabela_existe($pdo, 'users')) {
+        return;
+    }
+
+    $colunas = [
+        'whatsapp' => "ALTER TABLE users ADD COLUMN whatsapp VARCHAR(40) NULL",
+        'logo_marca' => "ALTER TABLE users ADD COLUMN logo_marca VARCHAR(255) NULL",
+    ];
+
+    foreach ($colunas as $coluna => $sql) {
+        if (doce_coluna_existe($pdo, 'users', $coluna)) {
+            continue;
+        }
+
+        try {
+            $pdo->exec($sql);
+        } catch (Exception $e) {
+            // Mantem o app funcionando mesmo quando o banco nao permite ALTER TABLE.
+        }
+    }
+}
+
+function doce_garantir_colunas_pedidos($pdo)
+{
+    if (!doce_tabela_existe($pdo, 'pedidos') || doce_coluna_existe($pdo, 'pedidos', 'estoque_baixado')) {
+        return;
+    }
+
+    try {
+        $pdo->exec("ALTER TABLE pedidos ADD COLUMN estoque_baixado TINYINT(1) NOT NULL DEFAULT 0");
+    } catch (Exception $e) {
+        // Coluna auxiliar; se nao puder criar agora, o banco atualizado pelo SQL continua sendo o caminho oficial.
+    }
 }
 
 function doce_garantir_coluna_imagem_receita($pdo)
@@ -190,6 +285,8 @@ $paginasLiberadas = [
 ];
 
 doce_garantir_coluna_imagem_receita($pdo);
+doce_garantir_colunas_usuario($pdo);
+doce_garantir_colunas_pedidos($pdo);
 
 if (!in_array($paginaAtual, $paginasLiberadas, true) && !doce_usuario_logado()) {
     header('Location: login.php');

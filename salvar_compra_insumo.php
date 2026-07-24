@@ -13,12 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$estoque_id, $user_id]);
     $item = $stmt->fetch();
 
-    if ($item && $preco_compra > 0 && $quantidade_comprada >= 0) {
+    if ($item && $preco_compra > 0 && $quantidade_comprada > 0) {
+        $preco_unitario = $preco_compra / $quantidade_comprada;
+
         $stmt = $pdo->prepare("INSERT INTO historico_precos (estoque_id, user_id, preco_compra, quantidade_comprada, data_compra, nota) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$estoque_id, $user_id, $preco_compra, $quantidade_comprada, $data_compra, $nota]);
 
         $stmt = $pdo->prepare("UPDATE estoque SET preco_unitario = ?, quantidade_atual = quantidade_atual + ? WHERE id = ? AND user_id = ?");
-        $stmt->execute([$preco_compra, $quantidade_comprada, $estoque_id, $user_id]);
+        $stmt->execute([$preco_unitario, $quantidade_comprada, $estoque_id, $user_id]);
     }
 }
 

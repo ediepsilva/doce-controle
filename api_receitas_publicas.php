@@ -555,7 +555,10 @@ unset($receita_publica);
 
 $estoquePorNome = [];
 try {
-    $user_id_api = $_SESSION['user_id'] ?? 1;
+    $user_id_api = intval($_REQUEST['user_id'] ?? ($_SESSION['user_id'] ?? 1));
+    if ($user_id_api <= 0) {
+        $user_id_api = 1;
+    }
     $stmtEstoque = $pdo->prepare("SELECT item_nome, unidade_medida, preco_unitario FROM estoque WHERE user_id = ?");
     $stmtEstoque->execute([$user_id_api]);
     foreach ($stmtEstoque->fetchAll(PDO::FETCH_ASSOC) as $itemEstoque) {

@@ -74,9 +74,16 @@ $clientes = $stmt->fetchAll();
                                     <a href="pedidos.php?cliente_id=<?= $c['id'] ?>" class="btn btn-outline-secondary btn-sm" title="Ver histórico de compras">
                                         <i class="bi bi-clock-history"></i>
                                     </a>
-                                    <a href="excluir_cliente.php?id=<?= $c['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Excluir este cliente e seus dados?')">
-                                        <i class="bi bi-trash"></i>
+                                    <a href="editar_cliente.php?id=<?= $c['id'] ?>" class="btn btn-outline-primary btn-sm" title="Editar cliente">
+                                        <i class="bi bi-pencil"></i>
                                     </a>
+                                    <form action="excluir_cliente.php" method="POST" class="d-inline" onsubmit="return confirm('Excluir este cliente e seus dados?')">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                                        <input type="hidden" name="id" value="<?= intval($c['id']) ?>">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -94,6 +101,7 @@ $clientes = $stmt->fetchAll();
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="salvar_cliente.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                 <div class="modal-header">
                     <h5 class="modal-title">Cadastrar Cliente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

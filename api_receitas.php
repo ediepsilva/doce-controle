@@ -3,21 +3,12 @@ require_once 'config.php';
 $header = 'Content-Type: application/json; charset=utf-8';
 header($header);
 
-// Suporte a token de teste (APENAS para desenvolvimento).
-// Use ?test_token=DEV_receitas_token&user_id=1 para autenticar temporariamente.
-$testToken = trim((string)($_REQUEST['test_token'] ?? ''));
-$DEV_TOKEN = 'DEV_receitas_token_2026';
-$override_user_id = 0;
-if ($testToken !== '' && $testToken === $DEV_TOKEN) {
-    $override_user_id = intval($_REQUEST['user_id'] ?? 0);
-}
-
-if (!isset($_SESSION['user_id']) && !$override_user_id) {
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Usuário não autenticado. Use sessão ou token de teste.']);
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['sucesso' => false, 'mensagem' => 'Usuario nao autenticado.']);
     exit;
 }
 
-$user_id = $override_user_id ?: $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'];
 $acao = $_REQUEST['acao'] ?? '';
 
 $jsonBody = null;

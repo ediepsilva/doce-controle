@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     nome VARCHAR(120) NOT NULL,
     email VARCHAR(160) NOT NULL UNIQUE,
     whatsapp VARCHAR(40) NULL,
+    logo_marca VARCHAR(255) NULL,
     password_hash VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ativo',
     plano VARCHAR(20) NOT NULL DEFAULT 'ativo',

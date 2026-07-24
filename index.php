@@ -42,10 +42,13 @@ $pedidosAbertos = $stmt->fetchColumn();
         <span class="navbar-brand fw-bold"><i class="bi bi-shop-window"></i> Doce Controle</span>
         <div class="d-flex align-items-center gap-2">
             <?php if ($usuarioAtual): ?>
-                <span class="text-white small d-none d-md-inline">Ola, <?= htmlspecialchars($usuarioAtual['nome']) ?></span>
+                <span class="text-white small d-none d-md-inline">Olá, <?= htmlspecialchars($usuarioAtual['nome']) ?></span>
             <?php endif; ?>
-            <a href="cardapio.php" class="btn btn-outline-light btn-sm" target="_blank">
-                <i class="bi bi-box-arrow-up-right"></i> Ver Cardapio
+            <a href="perfil.php" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-person-gear"></i> Perfil
+            </a>
+            <a href="cardapio.php?user_id=<?= urlencode((string)$user_id) ?>" class="btn btn-outline-light btn-sm" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i> Ver Cardápio
             </a>
             <a href="logout.php" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-box-arrow-right"></i> Sair
@@ -130,13 +133,31 @@ $pedidosAbertos = $stmt->fetchColumn();
                 </div>
             </div>
         </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-dark">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="card-title">Cozinha</h5>
+                            <p class="card-text text-muted mb-0">Fila de produção</p>
+                        </div>
+                        <span class="badge bg-dark fs-6"><i class="bi bi-fire"></i></span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="cozinha.php" class="btn btn-dark w-100">Abrir Cozinha</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row mt-5">
         <div class="col-12">
             <div class="alert alert-info" role="alert">
                 <strong>Bem-vinda!</strong> Use este painel para navegar rapidamente entre estoque, clientes, receitas e pedidos.
-                O cardapio publico ja pode ser divulgado para seus clientes.
+                O cardápio público já pode ser divulgado para seus clientes:
+                <a href="cardapio.php?user_id=<?= urlencode((string)$user_id) ?>" target="_blank" class="alert-link">abrir link público</a>.
             </div>
         </div>
     </div>

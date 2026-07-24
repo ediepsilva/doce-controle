@@ -13,6 +13,7 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute([$user_id]);
 $receitas = $stmt->fetchAll();
+$mensagem = $_GET['mensagem'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -250,6 +251,9 @@ $receitas = $stmt->fetchAll();
     <?php if (count($receitas) === 0): ?>
         <div class="alert alert-secondary text-center">Nenhuma receita cadastrada. Crie uma nova ficha técnica para começar.</div>
     <?php endif; ?>
+    <?php if ($mensagem === 'receita_em_uso'): ?>
+        <div class="alert alert-warning text-center">Esta receita possui pedidos vinculados e nao pode ser excluida.</div>
+    <?php endif; ?>
     <div class="row row-cols-1 row-cols-md-2 g-4">
         <?php foreach ($receitas as $r): ?>
             <?php $margem = $r['preco_venda_sugerido'] - $r['custo_total']; ?>
@@ -275,7 +279,11 @@ $receitas = $stmt->fetchAll();
                             <strong class="pink-shock">Margem:</strong> <span class="pink-shock">R$ <?= number_format($precoSugeridoCalculado - $r['custo_total'], 2, ',', '.') ?></span>
                         </div>
                         <a href="editar_receita.php?id=<?= $r['id'] ?>" class="btn btn-outline-dark btn-sm">Detalhes</a>
-                        <a href="excluir_receita.php?id=<?= $r['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Excluir esta receita?')">Excluir</a>
+                        <form action="excluir_receita.php" method="POST" class="d-inline" onsubmit="return confirm('Excluir esta receita?')">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                            <input type="hidden" name="id" value="<?= intval($r['id']) ?>">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Excluir</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -604,7 +612,7 @@ function abrirDetalhesReceita(index) {
             </div>
         </div>
         ${faltantesHtml}
-        <div class="receita-logo-teste">Logo da Cliente</div>
+        <div class="receita-logo-teste">Ficha Técnica</div>
         <h6 class="fw-bold pink-shock">Ingredientes</h6>
         ${ingredientes}
         <h6 class="fw-bold pink-shock">Modo de preparo</h6>
