@@ -67,6 +67,7 @@ try {
      $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
      $pdo->setAttribute(PDO::ATTR_TIMEOUT, 5);
 } catch (PDOException $e) {
+     $mostrarDetalhe = filter_var(doce_env('APP_DEBUG', '0'), FILTER_VALIDATE_BOOLEAN);
      http_response_code(503);
      ?>
      <!DOCTYPE html>
@@ -87,9 +88,11 @@ try {
                          O MySQL do XAMPP nao esta respondendo agora. Abra o painel do XAMPP, clique em
                          <strong>Start</strong> no MySQL e atualize esta pagina.
                      </p>
-                     <div class="alert alert-warning text-start small mb-0">
-                         Detalhe tecnico: <?= htmlspecialchars($e->getMessage()) ?>
-                     </div>
+                     <?php if ($mostrarDetalhe): ?>
+                         <div class="alert alert-warning text-start small mb-0">
+                             Detalhe tecnico: <?= htmlspecialchars($e->getMessage()) ?>
+                         </div>
+                     <?php endif; ?>
                  </div>
              </div>
          </main>
@@ -106,6 +109,13 @@ if (session_status() === PHP_SESSION_NONE) {
         mkdir($sessionPath, 0777, true);
     }
     session_save_path($sessionPath);
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
@@ -171,6 +181,11 @@ function doce_csrf_token()
 function doce_validar_csrf()
 {
     $token = (string)($_POST['csrf_token'] ?? '');
+    return doce_validar_csrf_token($token);
+}
+
+function doce_validar_csrf_token($token)
+{
     return $token !== '' && hash_equals((string)($_SESSION['csrf_token'] ?? ''), $token);
 }
 
@@ -272,7 +287,7 @@ function doce_usuario_inativo($pdo, $user_id)
 }
 
 $paginaAtual = basename($_SERVER['SCRIPT_NAME'] ?? '');
-$paginasLiberadas = [
+$paginasSemLogin = [
     'login.php',
     'cadastro.php',
     'redefinir_senha.php',
@@ -281,19 +296,26 @@ $paginasLiberadas = [
     'cardapio.php',
     'api_receitas.php',
     'api_receitas_publicas.php',
-    'testar_conexao.php',
+];
+
+$paginasPermitidasInativo = [
+    'login.php',
+    'logout.php',
+    'cobranca.php',
+    'cardapio.php',
+    'api_receitas_publicas.php',
 ];
 
 doce_garantir_coluna_imagem_receita($pdo);
 doce_garantir_colunas_usuario($pdo);
 doce_garantir_colunas_pedidos($pdo);
 
-if (!in_array($paginaAtual, $paginasLiberadas, true) && !doce_usuario_logado()) {
+if (!in_array($paginaAtual, $paginasSemLogin, true) && !doce_usuario_logado()) {
     header('Location: login.php');
     exit;
 }
 
-if (doce_usuario_logado() && !in_array($paginaAtual, $paginasLiberadas, true) && doce_usuario_inativo($pdo, $_SESSION['user_id'])) {
+if (doce_usuario_logado() && !in_array($paginaAtual, $paginasPermitidasInativo, true) && doce_usuario_inativo($pdo, $_SESSION['user_id'])) {
     header('Location: cobranca.php');
     exit;
 }

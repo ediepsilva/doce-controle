@@ -119,6 +119,12 @@ switch ($acao) {
         break;
 
     case 'criar':
+        $csrfToken = (string)(obterValor('csrf_token') ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf_token($csrfToken)) {
+            http_response_code(403);
+            $response['mensagem'] = 'Token de seguranca invalido.';
+            break;
+        }
         $nome = trim(obterValor('nome_receita') ?? '');
         $rendimento = intval(obterValor('rendimento_porcoes') ?? 0);
         $preco = floatval(obterValor('preco_venda_sugerido') ?? 0);
@@ -137,6 +143,12 @@ switch ($acao) {
         break;
 
     case 'editar':
+        $csrfToken = (string)(obterValor('csrf_token') ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf_token($csrfToken)) {
+            http_response_code(403);
+            $response['mensagem'] = 'Token de seguranca invalido.';
+            break;
+        }
         $id = intval(obterValor('id') ?? 0);
         $nome = trim(obterValor('nome_receita') ?? '');
         $rendimento = intval(obterValor('rendimento_porcoes') ?? 0);

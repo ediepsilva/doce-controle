@@ -44,9 +44,13 @@ DB_PORT=3306
 DB_NAME=nome_do_banco
 DB_USER=usuario_do_banco
 DB_PASS=senha_do_banco
+APP_DEBUG=0
+APP_URL=https://seu-dominio.example
 ```
 
 O arquivo `.env` nao deve ser enviado para o GitHub. Ele fica somente no servidor, com a senha real do banco.
+
+`APP_URL` deve conter o endereco publico do aplicativo, sem barra no final. Ele e usado para criar links seguros de redefinicao de senha. O servidor PHP tambem precisa estar configurado para enviar e-mails com a funcao `mail()`.
 
 ## Modulos
 

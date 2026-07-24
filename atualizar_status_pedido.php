@@ -50,23 +50,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf() && isset($_POST
     if (in_array($status, $valid, true)) {
         garantir_coluna_estoque_baixado($pdo);
 
-        $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ? AND user_id = ? LIMIT 1");
-        $stmt->execute([$id, $user_id]);
-        $pedido = $stmt->fetch();
+        try {
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("SELECT * FROM pedidos WHERE id = ? AND user_id = ? LIMIT 1 FOR UPDATE");
+            $stmt->execute([$id, $user_id]);
+            $pedido = $stmt->fetch();
 
-        if ($pedido) {
-            try {
-                $pdo->beginTransaction();
+            if ($pedido) {
                 if ($status !== 'Pendente') {
                     baixar_estoque_pedido($pdo, $pedido);
                 }
                 $stmt = $pdo->prepare("UPDATE pedidos SET status = ? WHERE id = ? AND user_id = ?");
                 $stmt->execute([$status, $id, $user_id]);
-                $pdo->commit();
-            } catch (Exception $e) {
-                if ($pdo->inTransaction()) {
-                    $pdo->rollBack();
-                }
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
             }
         }
     }

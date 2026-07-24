@@ -295,6 +295,7 @@ $mensagem = $_GET['mensagem'] ?? '';
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="formReceita" action="salvar_receita.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title"><i class="bi bi-journal-plus"></i> Criar Receita</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>

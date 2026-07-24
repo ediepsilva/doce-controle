@@ -122,7 +122,12 @@ function importar_ingredientes_receita_publica($pdo, $user_id, $receita_id, $rec
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf()) {
+    header('Location: receitas.php');
+    exit;
+}
+
+{
     $user_id = $_SESSION['user_id'];
     $nome = filter_input(INPUT_POST, 'nome_receita', FILTER_SANITIZE_SPECIAL_CHARS);
     $rendimento = intval($_POST['rendimento_porcoes']);

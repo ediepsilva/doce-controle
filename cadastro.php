@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nome, $email, doce_hash_senha($senha)]);
             }
 
+            session_regenerate_id(true);
             $_SESSION['user_id'] = intval($pdo->lastInsertId());
             $_SESSION['user_nome'] = $nome;
             header('Location: index.php');

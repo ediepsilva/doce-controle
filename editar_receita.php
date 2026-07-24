@@ -75,6 +75,7 @@ $descricaoPublica = $receita['descricao_publica'] ?? '';
                 <div class="card-body">
                     <h5 class="card-title">Ficha Técnica</h5>
                     <form action="salvar_receita.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                         <input type="hidden" name="id" value="<?= $receita['id'] ?>">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nome da Receita</label>

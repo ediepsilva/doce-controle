@@ -32,3 +32,15 @@ ALTER TABLE receitas
 UPDATE users
 SET nome = COALESCE(NULLIF(nome_confeitaria, ''), NULLIF(nome, ''), 'Usuario')
 WHERE nome = 'Usuario' AND nome_confeitaria IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_password_reset_user (user_id),
+    INDEX idx_password_reset_expires (expires_at),
+    CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

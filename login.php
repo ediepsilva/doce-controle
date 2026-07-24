@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($usuario && empty($usuario['password_hash'])) {
             $erro = 'Sua conta ainda nao tem senha cadastrada. Use "Esqueci minha senha" para criar uma nova senha.';
         } elseif ($usuario && doce_verificar_senha($senha, $usuario['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = intval($usuario['id']);
             $_SESSION['user_nome'] = $usuario['nome'];
             header('Location: index.php');

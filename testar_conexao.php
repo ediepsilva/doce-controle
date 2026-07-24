@@ -18,5 +18,5 @@ try {
     echo "</div>";
 
 } catch (PDOException $e) {
-    echo "<h2 style='color: red; text-align: center;'>❌ Erro: " . $e->getMessage() . "</h2>";
+    echo "<h2 style='color: red; text-align: center;'>Banco de dados indisponivel.</h2>";
 }
