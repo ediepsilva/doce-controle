@@ -1,7 +1,8 @@
-const CACHE_NAME = 'doce-controle-v3';
+const CACHE_NAME = 'doce-controle-v4';
 const APP_SHELL = [
     './',
     './assets/watermark.css',
+    './assets/pwa.js',
     './assets/delicias-da-mara-logo.jpg',
     './manifest.json'
 ];

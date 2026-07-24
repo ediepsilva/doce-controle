@@ -7,7 +7,8 @@
     "display": "standalone",
     "background_color": "#fff7fb",
     "theme_color": "#ff007f",
-    "orientation": "portrait",
+    "orientation": "any",
+    "categories": ["business", "productivity"],
     "icons": [
         {
             "src": "assets/delicias-da-mara-logo.jpg",
