@@ -53,7 +53,7 @@ $temMostrarCardapio = doce_coluna_existe($pdo, 'receitas', 'mostrar_cardapio');
 $temDescricaoPublica = doce_coluna_existe($pdo, 'receitas', 'descricao_publica');
 $campoImagem = $temImagemReceita ? 'r.imagem_produto,' : "'' AS imagem_produto,";
 $campoDescricao = $temDescricaoPublica ? 'r.descricao_publica,' : "'' AS descricao_publica,";
-$filtroCardapio = $temMostrarCardapio ? 'AND r.mostrar_cardapio = 1' : '';
+$filtroCardapio = '';
 
 $stmt = $pdo->prepare(
     "SELECT r.id, r.nome_receita, r.rendimento_porcoes, r.preco_venda_sugerido,
@@ -353,10 +353,26 @@ function cardapio_imagem_produto($produto)
 
     <main id="cardapio" class="catalog-band">
         <div class="container">
+            <?php
+                $resultadoPedido = (string)($_GET['pedido'] ?? '');
+                $mensagensPedido = [
+                    'sucesso' => ['success', 'Pedido enviado! A confeitaria recebeu sua encomenda.'],
+                    'dados' => ['warning', 'Confira seus dados e tente enviar o pedido novamente.'],
+                    'data' => ['warning', 'Escolha uma data e horario de entrega futuros.'],
+                    'produto' => ['warning', 'Este produto nao esta mais disponivel no cardapio.'],
+                    'aguarde' => ['warning', 'Aguarde alguns segundos antes de enviar outro pedido.'],
+                    'erro' => ['danger', 'Nao foi possivel enviar o pedido agora. Tente novamente.'],
+                ];
+            ?>
+            <?php if (isset($mensagensPedido[$resultadoPedido])): ?>
+                <div class="alert alert-<?= $mensagensPedido[$resultadoPedido][0] ?> shadow-sm mb-4" role="alert">
+                    <?= htmlspecialchars($mensagensPedido[$resultadoPedido][1]) ?>
+                </div>
+            <?php endif; ?>
             <div class="row align-items-end g-3 mb-4">
                 <div class="col-12 col-lg-7">
                     <h2 class="section-title mb-2">Cardapio de doces</h2>
-                    <p class="text-muted mb-0">Escolha um produto e envie o pedido direto pelo WhatsApp.</p>
+                    <p class="text-muted mb-0">Escolha um produto e faça sua encomenda sem precisar criar senha.</p>
                 </div>
                 <div class="col-12 col-lg-5">
                     <div class="filter-bar">
@@ -400,9 +416,17 @@ function cardapio_imagem_produto($produto)
                                         <i class="bi bi-stars"></i>
                                         Ideal para encomendas, festas e presentes.
                                     </div>
-                                    <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, $mensagemProduto)) ?>" target="_blank" rel="noopener" class="btn btn-pink mt-auto w-100">
-                                        <i class="bi bi-whatsapp"></i> Quero pedir
-                                    </a>
+                                    <button
+                                        type="button"
+                                        class="btn btn-pink mt-auto w-100 js-pedir"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalPedidoPublico"
+                                        data-receita-id="<?= intval($produto['id']) ?>"
+                                        data-produto="<?= htmlspecialchars($nomeProduto) ?>"
+                                        data-preco="<?= htmlspecialchars(number_format($preco, 2, ',', '.')) ?>"
+                                    >
+                                        <i class="bi bi-bag-check"></i> Fazer pedido
+                                    </button>
                                 </div>
                             </article>
                         </div>
@@ -415,6 +439,64 @@ function cardapio_imagem_produto($produto)
             <?php endif; ?>
         </div>
     </main>
+
+    <div class="modal fade" id="modalPedidoPublico" tabindex="-1" aria-labelledby="tituloPedidoPublico" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form action="salvar_pedido_publico.php" method="POST">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="modal-title h5 fw-bold mb-1" id="tituloPedidoPublico">Fazer pedido</h2>
+                            <div class="text-muted small" id="resumoProdutoPedido"></div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                        <input type="hidden" name="user_id" value="<?= intval($user_id) ?>">
+                        <input type="hidden" name="receita_id" id="pedidoReceitaId" value="">
+                        <div class="position-absolute opacity-0" style="pointer-events:none;" aria-hidden="true">
+                            <label for="pedidoWebsite">Website</label>
+                            <input type="text" name="website" id="pedidoWebsite" tabindex="-1" autocomplete="off">
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-7">
+                                <label for="pedidoNome" class="form-label fw-bold">Seu nome</label>
+                                <input type="text" class="form-control" name="nome" id="pedidoNome" maxlength="160" autocomplete="name" required>
+                            </div>
+                            <div class="col-12 col-md-5">
+                                <label for="pedidoWhatsapp" class="form-label fw-bold">WhatsApp</label>
+                                <input type="tel" class="form-control" name="whatsapp" id="pedidoWhatsapp" maxlength="20" placeholder="(00) 00000-0000" autocomplete="tel" required>
+                            </div>
+                            <div class="col-12 col-md-7">
+                                <label for="pedidoEmail" class="form-label fw-bold">E-mail <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="email" class="form-control" name="email" id="pedidoEmail" maxlength="160" autocomplete="email">
+                            </div>
+                            <div class="col-5 col-md-3">
+                                <label for="pedidoQuantidade" class="form-label fw-bold">Quantidade</label>
+                                <input type="number" class="form-control" name="quantidade" id="pedidoQuantidade" min="1" max="100" value="1" required>
+                            </div>
+                            <div class="col-12 col-md-7">
+                                <label for="pedidoDataEntrega" class="form-label fw-bold">Data e horario desejados</label>
+                                <input type="datetime-local" class="form-control" name="data_entrega" id="pedidoDataEntrega" min="<?= date('Y-m-d\TH:i') ?>" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="pedidoObservacoes" class="form-label fw-bold">Observacoes <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea class="form-control" name="observacoes" id="pedidoObservacoes" rows="3" maxlength="1000" placeholder="Tema, cor, sabor ou outro detalhe importante"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-pink">
+                            <i class="bi bi-send-check"></i> Enviar pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <footer class="py-4" style="background: var(--fundo);">
         <div class="container d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
@@ -432,6 +514,7 @@ function cardapio_imagem_produto($produto)
         <i class="bi bi-whatsapp"></i>
     </a>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const buscaProduto = document.getElementById('buscaProduto');
         const produtos = Array.from(document.querySelectorAll('.produto-item'));
@@ -455,6 +538,14 @@ function cardapio_imagem_produto($produto)
                 }
             });
         }
+
+        document.querySelectorAll('.js-pedir').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('pedidoReceitaId').value = button.dataset.receitaId;
+                document.getElementById('resumoProdutoPedido').textContent =
+                    `${button.dataset.produto} - R$ ${button.dataset.preco}`;
+            });
+        });
     </script>
 </body>
 </html>

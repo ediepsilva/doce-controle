@@ -233,24 +233,17 @@ $mensagem = $_GET['mensagem'] ?? '';
 </nav>
 
 <div class="container">
-    <div class="row mb-3">
-        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+    <div class="row mb-4">
+        <div class="col-12 d-flex flex-column justify-content-center align-items-center text-center gap-3" style="min-height: 220px;">
             <div>
-                <h1 class="h3 mb-0">Receitas</h1>
-                <p class="text-muted mb-0">Fichas técnicas baseadas em custos reais do estoque.</p>
+                <h1 class="h3 mb-0">Receitas para o cardápio</h1>
+                <p class="text-muted mb-0">Cadastre e organize as receitas que aparecem para os clientes.</p>
             </div>
-            <button class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#modalReceita">
-                <i class="bi bi-plus-circle"></i> Nova Receita
-            </button>
-            <button id="btnMenuReceitas" class="btn btn-warning btn-lg border-dark text-dark" data-bs-toggle="modal" data-bs-target="#modalMenuReceitas">
-                <i class="bi bi-list-stars"></i> Menu de Receitas
+            <button class="btn btn-warning btn-lg px-4" data-bs-toggle="modal" data-bs-target="#modalReceita" style="min-width: 220px;">
+                <i class="bi bi-plus-circle"></i> Cadastro receita
             </button>
         </div>
     </div>
-
-    <?php if (count($receitas) === 0): ?>
-        <div class="alert alert-secondary text-center">Nenhuma receita cadastrada. Crie uma nova ficha técnica para começar.</div>
-    <?php endif; ?>
     <?php if ($mensagem === 'receita_em_uso'): ?>
         <div class="alert alert-warning text-center">Esta receita possui pedidos vinculados e nao pode ser excluida.</div>
     <?php endif; ?>
@@ -278,6 +271,11 @@ $mensagem = $_GET['mensagem'] ?? '';
                             <strong class="pink-shock">Preco sugerido:</strong> <span class="pink-shock">R$ <?= number_format($precoSugeridoCalculado, 2, ',', '.') ?></span><br>
                             <strong class="pink-shock">Margem:</strong> <span class="pink-shock">R$ <?= number_format($precoSugeridoCalculado - $r['custo_total'], 2, ',', '.') ?></span>
                         </div>
+                        <button type="button" class="btn btn-outline-dark btn-sm btn-editar-receita"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEditarReceita">
+                            Criar receita
+                        </button>
                         <a href="editar_receita.php?id=<?= $r['id'] ?>" class="btn btn-outline-dark btn-sm">Detalhes</a>
                         <form action="excluir_receita.php" method="POST" class="d-inline" onsubmit="return confirm('Excluir esta receita?')">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
@@ -294,45 +292,109 @@ $mensagem = $_GET['mensagem'] ?? '';
 <div class="modal fade" id="modalReceita" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="formReceita" action="salvar_receita.php" method="POST" enctype="multipart/form-data">
+            <form id="formCadastroReceita" action="salvar_receita.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                <input type="hidden" name="id" value="">
+                <input type="hidden" name="receita_publica_id" value="0">
                 <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="bi bi-journal-plus"></i> Criar Receita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <h5 class="modal-title"><i class="bi bi-journal-plus"></i> Cadastro receita</h5>
+                    <div class="modal-window-actions">
+                        <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalMenuReceitas">
+                            <i class="bi bi-list-stars"></i> Ver menu
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nome da Receita</label>
-                        <input type="text" id="nomeReceitaInput" name="nome_receita" class="form-control" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">Rendimento</label>
-                            <input type="number" id="rendimentoReceitaInput" name="rendimento_porcoes" class="form-control" min="1" value="1" required>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">Preço de Venda</label>
-                            <input type="number" id="precoReceitaInput" step="0.01" name="preco_venda_sugerido" class="form-control" required>
-                        </div>
+                    <div class="alert alert-light border-warning mb-3">
+                        <strong class="d-block">Cadastre a receita que vai aparecer para o cliente</strong>
+                        <span class="text-muted small">Use este formulário para registrar o nome, a foto e a descrição da receita.</span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Foto para o cardapio publico</label>
+                        <label class="form-label fw-bold">Nome da receita</label>
+                        <input type="text" name="nome_receita" class="form-control" placeholder="Digite o nome da receita para identificar no cardápio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Foto do produto</label>
                         <input type="file" name="imagem_produto" class="form-control" accept="image/jpeg,image/png,image/webp">
-                        <small class="text-muted">Opcional. Use JPG, PNG ou WebP ate 3 MB.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Descricao publica</label>
                         <textarea name="descricao_publica" class="form-control" rows="3" placeholder="Ex: Bolo fofinho com recheio cremoso, ideal para aniversarios."></textarea>
-                        <small class="text-muted">Texto que aparece no cardapio para os clientes.</small>
                     </div>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" id="mostrarCardapioInput" name="mostrar_cardapio" value="1" checked>
-                        <label class="form-check-label fw-bold" for="mostrarCardapioInput">Mostrar no cardapio publico</label>
+                    <div class="form-check form-switch mb-2" data-mostrar-cardapio-group>
+                        <input class="form-check-input" type="checkbox" role="switch" name="mostrar_cardapio" value="1" disabled>
+                        <label class="form-check-label fw-bold">Mostrar no cardápio público</label>
+                    </div>
+                    <div class="form-text text-muted small" data-mostrar-cardapio-help>
+                        Disponível apenas quando todos os ingredientes da receita tiverem preço no estoque.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning px-4">Salvar Receita</button>
+                    <button type="submit" class="btn btn-warning px-4">Salvar foto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarReceita" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form id="formReceita" action="salvar_receita.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                <input type="hidden" id="receitaIdInput" name="id" value="">
+                <input type="hidden" id="receitaPublicaIdInput" name="receita_publica_id" value="0">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square"></i> crie sua receita</h5>
+                    <div class="modal-window-actions">
+                        <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalMenuReceitas">
+                            <i class="bi bi-list-stars"></i> Ver menu
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border-warning mb-3">
+                        <strong class="d-block">Complete a ficha da receita para o cadastro definitivo</strong>
+                        <span class="text-muted small">Aqui você pode preencher nome, ingredientes, porção e modo de preparo.</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome da receita</label>
+                        <input type="text" id="nomeReceitaInput" name="nome_receita" class="form-control" placeholder="Digite o nome da receita para identificar no cardápio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Porções</label>
+                        <input type="number" name="rendimento_porcoes" class="form-control" min="1" value="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ingredientes</label>
+                        <textarea name="ingredientes_texto" class="form-control" rows="4" placeholder="Ex: 500g de leite condensado, 2 colheres de manteiga, 1 pacote de chocolate."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modo de preparo</label>
+                        <textarea name="modo_preparo" class="form-control" rows="5" placeholder="Descreva o passo a passo da receita."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Foto do produto</label>
+                        <input type="file" name="imagem_produto" class="form-control" accept="image/jpeg,image/png,image/webp">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descricao publica</label>
+                        <textarea name="descricao_publica" class="form-control" rows="3" placeholder="Ex: Bolo fofinho com recheio cremoso, ideal para aniversarios."></textarea>
+                    </div>
+                    <div class="form-check form-switch mb-2" data-mostrar-cardapio-group>
+                        <input class="form-check-input" type="checkbox" role="switch" id="mostrarCardapioInput" name="mostrar_cardapio" value="1" disabled>
+                        <label class="form-check-label fw-bold" for="mostrarCardapioInput">Mostrar no cardápio público</label>
+                    </div>
+                    <div class="form-text text-muted small" data-mostrar-cardapio-help>
+                        Disponível apenas quando todos os ingredientes da receita tiverem preço no estoque.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning px-4">Salvar receita</button>
                 </div>
             </form>
         </div>
@@ -344,8 +406,11 @@ $mensagem = $_GET['mensagem'] ?? '';
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content border-warning" style="border-top: 4px solid #ffc107;">
             <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cake2"></i> Catálogo de Receitas</h5>
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cake2"></i> Catálogo de receitas para o cardápio</h5>
                 <div class="modal-window-actions">
+                    <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalReceita">
+                        <i class="bi bi-journal-plus"></i> Cadastro receita
+                    </button>
                     <button type="button" class="btn btn-outline-dark btn-sm" data-modal-toggle-size="modalMenuReceitas" aria-label="Maximizar">
                         <i class="bi bi-arrows-fullscreen"></i>
                     </button>
@@ -353,10 +418,6 @@ $mensagem = $_GET['mensagem'] ?? '';
                 </div>
             </div>
             <div class="modal-body catalogo-body">
-                <div class="mb-4">
-                    <input type="text" id="buscaReceitas" class="form-control form-control-lg" placeholder="🔍 Buscar receita (ex: Brigadeiro, Bolo...)">
-                    <small class="text-muted d-block mt-1">Digite para filtrar as receitas disponíveis</small>
-                </div>
                 <div id="menuReceitasList" class="row g-4">
                     <div class="col-12 text-center text-muted py-5">
                         <div class="spinner-border text-warning mb-3" role="status">
@@ -367,6 +428,9 @@ $mensagem = $_GET['mensagem'] ?? '';
                 </div>
             </div>
             <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-warning fw-bold" id="btnEditarReceitaCatalogo" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalEditarReceita">
+                    <i class="bi bi-pencil-square"></i> crie sua receita
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar Catálogo</button>
             </div>
         </div>
@@ -398,15 +462,11 @@ $mensagem = $_GET['mensagem'] ?? '';
 // Variável global para armazenar todas as receitas
 let todasAsReceitas = [];
 let receitasRenderizadas = [];
+let receitaSelecionadaIndex = null;
 
 // Carrega receitas via API quando o modal for aberto
 document.getElementById('modalMenuReceitas').addEventListener('show.bs.modal', function () {
     carregarMenuReceitas();
-});
-
-// Busca em tempo real
-document.getElementById('buscaReceitas').addEventListener('keyup', function () {
-    filtrarReceitas(this.value);
 });
 
 document.querySelectorAll('[data-modal-toggle-size]').forEach(botao => {
@@ -416,7 +476,35 @@ document.querySelectorAll('[data-modal-toggle-size]').forEach(botao => {
 });
 
 document.getElementById('modalReceita').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('formReceita').reset();
+    const form = document.getElementById('formCadastroReceita');
+    if (form) {
+        form.reset();
+    }
+    receitaSelecionadaIndex = null;
+});
+
+document.getElementById('modalEditarReceita').addEventListener('hidden.bs.modal', function () {
+    const form = document.getElementById('formReceita');
+    if (form) {
+        form.reset();
+        const receitaIdInput = form.querySelector('[name="id"]');
+        const receitaPublicaIdInput = form.querySelector('[name="receita_publica_id"]');
+        if (receitaIdInput) receitaIdInput.value = '';
+        if (receitaPublicaIdInput) receitaPublicaIdInput.value = '0';
+    }
+    receitaSelecionadaIndex = null;
+});
+
+document.querySelectorAll('.btn-editar-receita').forEach(botao => {
+    botao.addEventListener('click', function () {
+        abrirFormularioEdicaoReceita();
+    });
+});
+
+document.getElementById('btnEditarReceitaCatalogo').addEventListener('click', function () {
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditarReceita'));
+    prepararFormularioReceita({});
+    modal.show();
 });
 
 function alternarTamanhoModal(modalId, botao) {
@@ -510,14 +598,17 @@ function renderizarReceitas(receitas) {
         const precoSugeridoHtml = r.custo_status === 'completo' && precoSugerido > 0
             ? `<span class="d-block"><i class="bi bi-tag"></i> Preco sugerido: R$ ${formatarMoeda(precoSugerido)}</span>`
             : '<span class="d-block"><i class="bi bi-exclamation-triangle"></i> Preco sugerido pendente</span>';
-        const acaoHtml = `<button type="button" class="btn btn-sm btn-warning fw-bold mt-auto btn-ver-receita" data-receita-index="${idx}">
+        const acaoHtml = `
+            <button type="button" class="btn btn-warning btn-sm mt-3" data-action="ver-receita" data-receita-index="${idx}">
                 <i class="bi bi-eye"></i> Ver receita
-           </button>`;
+            </button>
+        `;
 
         html += `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0 overflow-hidden recipe-card menu-card-rosa" 
-                     style="--recipe-color: ${cor}; transition: all 0.3s ease; cursor: pointer;">
+                     style="--recipe-color: ${cor}; transition: all 0.3s ease; cursor: pointer;"
+                     data-receita-index="${idx}">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center" 
                          style="background-color: ${cor}15 !important; border: none;">
                         <span class="fs-3">${icone}</span>
@@ -550,13 +641,90 @@ function renderizarReceitas(receitas) {
             this.style.transform = 'translateY(0)';
             this.style.boxShadow = '';
         });
-    });
+        card.addEventListener('click', function(event) {
+            const botaoDetalhes = event.target.closest('[data-action="ver-receita"]');
+            if (botaoDetalhes) {
+                event.stopPropagation();
+                abrirDetalhesReceita(Number(botaoDetalhes.dataset.receitaIndex));
+                return;
+            }
 
-    document.querySelectorAll('.btn-ver-receita').forEach(botao => {
-        botao.addEventListener('click', function() {
-            abrirDetalhesReceita(Number(this.dataset.receitaIndex));
+            receitaSelecionadaIndex = Number(this.dataset.receitaIndex);
+            document.querySelectorAll('.recipe-card').forEach(item => item.classList.remove('border-warning'));
+            this.classList.add('border-warning');
         });
     });
+
+}
+
+function abrirFormularioEdicaoReceita() {
+    const form = document.getElementById('formReceita');
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditarReceita'));
+    const titulo = document.querySelector('#modalEditarReceita .modal-title');
+    const receitaSelecionada = receitaSelecionadaIndex !== null && todasAsReceitas[receitaSelecionadaIndex]
+        ? todasAsReceitas[receitaSelecionadaIndex]
+        : {};
+
+    if (!form) return;
+
+    if (titulo) {
+        titulo.innerHTML = '<i class="bi bi-pencil-square"></i> edite sua receita';
+    }
+
+    prepararFormularioReceita(receitaSelecionada);
+    modal.show();
+}
+
+function prepararFormularioReceita(dados = {}) {
+    const form = document.getElementById('formReceita') || document.getElementById('formCadastroReceita');
+    if (!form) return;
+
+    const idInput = form.querySelector('[name="id"]');
+    const nomeInput = form.querySelector('[name="nome_receita"]');
+    const rendimentoInput = form.querySelector('[name="rendimento_porcoes"]');
+    const descricaoInput = form.querySelector('[name="descricao_publica"]');
+    const ingredientesInput = form.querySelector('[name="ingredientes_texto"]');
+    const modoPreparoInput = form.querySelector('[name="modo_preparo"]');
+    const receitaPublicaIdInput = form.querySelector('[name="receita_publica_id"]');
+    const mostrarCardapioInput = form.querySelector('[name="mostrar_cardapio"]');
+    const mostrarCardapioGroup = form.querySelector('[data-mostrar-cardapio-group]');
+    const mostrarCardapioHelp = form.querySelector('[data-mostrar-cardapio-help]');
+    const todosIngredientesComPreco = Array.isArray(dados.ingredientes)
+        ? dados.ingredientes.every(item => Number(item.preco_unitario || 0) > 0)
+        : dados.custo_status === 'completo';
+    const podeMostrarNoCardapio = Boolean(todosIngredientesComPreco);
+
+    if (idInput) idInput.value = dados.receitaId || dados.id || '';
+    if (nomeInput) nomeInput.value = dados.receitaNome || dados.nome_receita || '';
+    if (rendimentoInput) rendimentoInput.value = dados.receitaRendimento || dados.rendimento_porcoes || 1;
+    if (descricaoInput) descricaoInput.value = dados.receitaDescricao || dados.descricao || '';
+    if (ingredientesInput) {
+        if (typeof dados.ingredientes_texto !== 'undefined' && dados.ingredientes_texto !== null) {
+            ingredientesInput.value = dados.ingredientes_texto;
+        } else if (Array.isArray(dados.ingredientes) && dados.ingredientes.length) {
+            ingredientesInput.value = dados.ingredientes
+                .map(item => `${item.quantidade_usada ?? ''} ${item.unidade_medida ?? ''} ${item.item_nome ?? ''}`.trim())
+                .filter(Boolean)
+                .join('\n');
+        } else {
+            ingredientesInput.value = '';
+        }
+    }
+    if (modoPreparoInput) modoPreparoInput.value = dados.modo_preparo || '';
+    if (receitaPublicaIdInput) receitaPublicaIdInput.value = dados.receitaPublicaId || dados.id || '0';
+    if (mostrarCardapioInput) {
+        mostrarCardapioInput.disabled = !podeMostrarNoCardapio;
+        mostrarCardapioInput.checked = podeMostrarNoCardapio && parseInt(dados.mostrar_cardapio ?? 1, 10) === 1;
+    }
+    if (mostrarCardapioGroup) {
+        mostrarCardapioGroup.classList.toggle('opacity-50', !podeMostrarNoCardapio);
+    }
+    if (mostrarCardapioHelp) {
+        mostrarCardapioHelp.classList.toggle('d-none', podeMostrarNoCardapio);
+        mostrarCardapioHelp.textContent = podeMostrarNoCardapio
+            ? 'Pronto para aparecer no cardápio público.'
+            : 'Disponível apenas quando todos os ingredientes da receita tiverem preço no estoque.';
+    }
 }
 
 function abrirDetalhesReceita(index) {
@@ -626,21 +794,6 @@ function abrirDetalhesReceita(index) {
            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>`;
 
     bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetalheReceita')).show();
-}
-
-function filtrarReceitas(termo) {
-    if (!termo.trim()) {
-        renderizarReceitas(todasAsReceitas);
-        return;
-    }
-
-    const termoLower = termo.toLowerCase();
-    const filtradas = todasAsReceitas.filter(r => 
-        r.nome_receita.toLowerCase().includes(termoLower) ||
-        (r.descricao && r.descricao.toLowerCase().includes(termoLower))
-    );
-
-    renderizarReceitas(filtradas);
 }
 
 function escapeHtml(unsafe) {

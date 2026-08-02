@@ -236,6 +236,8 @@ function doce_garantir_coluna_imagem_receita($pdo)
         'imagem_produto' => "ALTER TABLE receitas ADD COLUMN imagem_produto VARCHAR(255) NULL",
         'mostrar_cardapio' => "ALTER TABLE receitas ADD COLUMN mostrar_cardapio TINYINT(1) NOT NULL DEFAULT 1",
         'descricao_publica' => "ALTER TABLE receitas ADD COLUMN descricao_publica TEXT NULL",
+        'ingredientes_texto' => "ALTER TABLE receitas ADD COLUMN ingredientes_texto TEXT NULL",
+        'modo_preparo' => "ALTER TABLE receitas ADD COLUMN modo_preparo TEXT NULL",
     ];
 
     foreach ($colunas as $coluna => $sql) {
@@ -294,6 +296,7 @@ $paginasSemLogin = [
     'logout.php',
     'cobranca.php',
     'cardapio.php',
+    'salvar_pedido_publico.php',
     'api_receitas.php',
     'api_receitas_publicas.php',
 ];

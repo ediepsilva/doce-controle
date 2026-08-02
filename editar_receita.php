@@ -37,9 +37,11 @@ foreach ($itens as $item) {
     $custoTotal += $item['custo_item'];
 }
 $precoSugeridoCalculado = $custoTotal * DOCE_APP_MULTIPLICADOR_PRECO_SUGERIDO;
-$imagemProduto = $receita['imagem_produto'] ?? '';
-$imagemPreview = $imagemProduto !== '' ? $imagemProduto : 'assets/delicias-da-mara-logo.jpg';
-$mostrarCardapio = intval($receita['mostrar_cardapio'] ?? 1) === 1;
+$itensSemPreco = array_filter($itens, function ($item) {
+    return floatval($item['preco_unitario'] ?? 0) <= 0;
+});
+$todosIngredientesComPreco = count($itens) > 0 && count($itensSemPreco) === 0;
+$mostrarCardapio = $todosIngredientesComPreco && intval($receita['mostrar_cardapio'] ?? 1) === 1;
 $descricaoPublica = $receita['descricao_publica'] ?? '';
 ?>
 
@@ -70,100 +72,118 @@ $descricaoPublica = $receita['descricao_publica'] ?? '';
 
 <div class="container">
     <div class="row gy-4">
-        <div class="col-12 col-xl-6">
+        <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Ficha Técnica</h5>
+                    <h5 class="card-title">Editar receita</h5>
+                    <p class="text-muted mb-4">Preencha os dados da receita, adicione os ingredientes e defina o modo de preparo para a ficha completa. A foto é incluída na tela de cadastro da receita.</p>
                     <form action="salvar_receita.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                         <input type="hidden" name="id" value="<?= $receita['id'] ?>">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nome da Receita</label>
-                            <input type="text" name="nome_receita" value="<?= htmlspecialchars($receita['nome_receita']) ?>" class="form-control" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Rendimento</label>
-                                <input type="number" name="rendimento_porcoes" value="<?= htmlspecialchars($receita['rendimento_porcoes']) ?>" class="form-control" min="1" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Preço de Venda</label>
-                                <input type="number" step="0.01" name="preco_venda_sugerido" value="<?= htmlspecialchars($receita['preco_venda_sugerido']) ?>" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Foto para o cardapio publico</label>
-                            <div class="border rounded p-2 mb-2 bg-white">
-                                <img src="<?= htmlspecialchars($imagemPreview) ?>" alt="Foto atual de <?= htmlspecialchars($receita['nome_receita']) ?>" class="img-fluid rounded" style="max-height: 220px; width: 100%; object-fit: contain;">
-                            </div>
-                            <input type="file" name="imagem_produto" class="form-control" accept="image/jpeg,image/png,image/webp">
-                            <small class="text-muted">Use JPG, PNG ou WebP ate 3 MB. Se nao escolher outra foto, a atual continua.</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Descricao publica</label>
-                            <textarea name="descricao_publica" class="form-control" rows="4" placeholder="Ex: Bolo fofinho com recheio cremoso, ideal para aniversarios."><?= htmlspecialchars($descricaoPublica) ?></textarea>
-                            <small class="text-muted">Texto exibido no cardapio publico para vender melhor o produto.</small>
-                        </div>
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" role="switch" id="mostrarCardapioInput" name="mostrar_cardapio" value="1" <?= $mostrarCardapio ? 'checked' : '' ?>>
-                            <label class="form-check-label fw-bold" for="mostrarCardapioInput">Mostrar no cardapio publico</label>
-                        </div>
-                        <div class="mb-3">
-                            <button class="btn btn-warning w-100">Salvar Receita</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
-            <div class="card shadow-sm mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">Ingredientes</h5>
-                    <form action="salvar_item_receita.php" method="POST">
-                        <input type="hidden" name="receita_id" value="<?= $receita['id'] ?>">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Insumo</label>
-                            <select name="insumo_id" class="form-select" required>
-                                <option value="">Selecione o insumo</option>
-                                <?php foreach ($insumos as $insumo): ?>
-                                    <option value="<?= $insumo['id'] ?>"><?= htmlspecialchars($insumo['item_nome']) ?> (<?= htmlspecialchars($insumo['unidade_medida']) ?>)</option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Quantidade usada</label>
-                            <input type="number" step="0.001" name="quantidade_usada" class="form-control" required>
-                        </div>
-                        <button class="btn btn-success w-100">Adicionar Ingrediente</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-xl-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Resumo de Custos</h5>
-                    <p class="mb-2">Custo total da receita: <strong>R$ <?= number_format($custoTotal, 2, ',', '.') ?></strong></p>
-                    <p class="mb-2">Preco sugerido: <strong>R$ <?= number_format($precoSugeridoCalculado, 2, ',', '.') ?></strong></p>
-                    <p class="mb-2">Margem estimada: <strong>R$ <?= number_format($precoSugeridoCalculado - $custoTotal, 2, ',', '.') ?></strong></p>
-                    <hr>
-                    <h6 class="mb-3">Ingredientes adicionados</h6>
-                    <?php if (count($itens) === 0): ?>
-                        <div class="alert alert-secondary">Nenhum ingrediente adicionado ainda.</div>
-                    <?php else: ?>
-                        <div class="list-group">
-                            <?php foreach ($itens as $item): ?>
-                                <div class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="fw-bold"><?= htmlspecialchars($item['item_nome']) ?></div>
-                                        <small class="text-muted">Quantidade: <?= number_format($item['quantidade_usada'], 3, ',', '.') ?> <?= htmlspecialchars($item['unidade_medida']) ?></small>
-                                        <div class="small text-muted">Custo: R$ <?= number_format($item['custo_item'], 2, ',', '.') ?></div>
-                                    </div>
-                                    <a href="excluir_item_receita.php?id=<?= $item['id'] ?>&receita_id=<?= $receita['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">Remover</a>
+                        <div class="row g-4">
+                            <div class="col-12 col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nome da receita</label>
+                                    <input type="text" name="nome_receita" value="<?= htmlspecialchars($receita['nome_receita']) ?>" class="form-control" required>
                                 </div>
-                            <?php endforeach; ?>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label fw-bold">Rendimento</label>
+                                        <input type="number" name="rendimento_porcoes" value="<?= htmlspecialchars($receita['rendimento_porcoes']) ?>" class="form-control" min="1" required>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label fw-bold">Preço de venda</label>
+                                        <input type="number" step="0.01" name="preco_venda_sugerido" value="<?= htmlspecialchars($receita['preco_venda_sugerido']) ?>" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Descrição pública</label>
+                                    <textarea name="descricao_publica" class="form-control" rows="4" placeholder="Ex: Bolo fofinho com recheio cremoso, ideal para aniversarios."><?= htmlspecialchars($descricaoPublica) ?></textarea>
+                                    <small class="text-muted">Texto exibido no cardápio para vender melhor o produto.</small>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="card border-light bg-light">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold mb-3">Ingredientes</h6>
+                                        <form action="salvar_item_receita.php" method="POST" class="mb-3">
+                                            <input type="hidden" name="receita_id" value="<?= $receita['id'] ?>">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Insumo</label>
+                                                <select name="insumo_id" class="form-select" required>
+                                                    <option value="">Selecione o insumo</option>
+                                                    <?php foreach ($insumos as $insumo): ?>
+                                                        <option value="<?= $insumo['id'] ?>"><?= htmlspecialchars($insumo['item_nome']) ?> (<?= htmlspecialchars($insumo['unidade_medida']) ?>)</option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Quantidade usada</label>
+                                                <input type="number" step="0.001" name="quantidade_usada" class="form-control" required>
+                                            </div>
+                                            <button class="btn btn-success w-100">Adicionar ingrediente</button>
+                                        </form>
+
+                                        <hr>
+                                        <h6 class="fw-bold mb-3">Ingredientes adicionados</h6>
+                                        <?php if (count($itens) === 0): ?>
+                                            <div class="alert alert-secondary mb-0">Nenhum ingrediente adicionado ainda.</div>
+                                        <?php else: ?>
+                                            <div class="list-group">
+                                                <?php foreach ($itens as $item): ?>
+                                                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <div class="fw-bold"><?= htmlspecialchars($item['item_nome']) ?></div>
+                                                            <small class="text-muted">Quantidade: <?= number_format($item['quantidade_usada'], 3, ',', '.') ?> <?= htmlspecialchars($item['unidade_medida']) ?></small>
+                                                            <div class="small text-muted">Custo: R$ <?= number_format($item['custo_item'], 2, ',', '.') ?></div>
+                                                        </div>
+                                                        <a href="excluir_item_receita.php?id=<?= $item['id'] ?>&receita_id=<?= $receita['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">Remover</a>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    <?php endif; ?>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold">Foto do produto</label>
+                            <input type="file" name="imagem_produto" class="form-control" accept="image/jpeg,image/png,image/webp">
+                            <small class="text-muted">Envie uma nova imagem para trocar a foto atual da receita.</small>
+                            <?php if (!empty($receita['imagem_produto'])): ?>
+                                <div class="mt-2">
+                                    <small class="text-muted">Foto atual:</small><br>
+                                    <img src="<?= htmlspecialchars($receita['imagem_produto']) ?>" alt="Foto atual da receita" class="img-fluid rounded border mt-2" style="max-height: 180px; object-fit: cover;">
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-bold">Modo de preparo</label>
+                            <textarea name="modo_preparo" class="form-control" rows="5" placeholder="Descreva o modo de preparo da receita."><?= htmlspecialchars($receita['modo_preparo'] ?? '') ?></textarea>
+                            <small class="text-muted">Escreva o passo a passo da receita.</small>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="mostrar_cardapio" value="1" <?= $mostrarCardapio ? 'checked' : '' ?> <?= $todosIngredientesComPreco ? '' : 'disabled' ?>>
+                                <label class="form-check-label fw-bold">Mostrar no cardápio público</label>
+                            </div>
+                            <?php if (!$todosIngredientesComPreco): ?>
+                                <div class="form-text text-muted small">Disponível apenas quando todos os ingredientes da receita tiverem preço no estoque.</div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                            <div class="text-muted small">
+                                Custo total: <strong>R$ <?= number_format($custoTotal, 2, ',', '.') ?></strong>
+                            </div>
+                            <button class="btn btn-warning px-4">Salvar foto</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
