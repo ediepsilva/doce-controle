@@ -1,9 +1,10 @@
 <?php
 require_once 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$estoque_id = intval($_POST['estoque_id'] ?? 0);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf()) {
     $user_id = $_SESSION['user_id'];
-    $estoque_id = intval($_POST['estoque_id']);
     $preco_compra = floatval($_POST['preco_compra']);
     $quantidade_comprada = floatval($_POST['quantidade_comprada']);
     $data_compra = $_POST['data_compra'];

@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf()) {
     header('Location: estoque.php');
     exit;
 }

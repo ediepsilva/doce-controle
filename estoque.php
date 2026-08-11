@@ -27,15 +27,20 @@ foreach ($catalogoReceitas as $receitaCatalogo) {
     }
 }
 
-foreach ($ingredientesCatalogo as $ingredienteCatalogo) {
-    $stmt = $pdo->prepare("SELECT id FROM estoque WHERE user_id = ? AND LOWER(item_nome) = LOWER(?) LIMIT 1");
-    $stmt->execute([$user_id, $ingredienteCatalogo['item_nome']]);
-    if (!$stmt->fetch()) {
+if ($ingredientesCatalogo) {
+    $stmt = $pdo->prepare("SELECT LOWER(item_nome) FROM estoque WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+    $existentes = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
+    $faltantes = array_diff_key($ingredientesCatalogo, $existentes);
+
+    if ($faltantes) {
         $stmt = $pdo->prepare(
             "INSERT INTO estoque (user_id, item_nome, unidade_medida, preco_unitario, quantidade_atual, estoque_minimo)
              VALUES (?, ?, ?, 0, 0, 0)"
         );
-        $stmt->execute([$user_id, $ingredienteCatalogo['item_nome'], $ingredienteCatalogo['unidade_medida']]);
+        foreach ($faltantes as $ingredienteCatalogo) {
+            $stmt->execute([$user_id, $ingredienteCatalogo['item_nome'], $ingredienteCatalogo['unidade_medida']]);
+        }
     }
 }
 
@@ -128,6 +133,7 @@ function formatar_numero_input($valor)
             <?php endif; ?>
 
             <form id="formEstoqueTabela" action="salvar_estoque_tabela.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle stock-table">
                         <thead class="table-success">
@@ -212,9 +218,13 @@ function formatar_numero_input($valor)
                     <a href="editar_insumo.php?id=<?= $i['id'] ?>" class="btn btn-outline-primary btn-sm flex-fill">
                         <i class="bi bi-pencil"></i> Editar
                     </a>
-                    <a href="excluir_insumo.php?id=<?= $i['id'] ?>" class="btn btn-outline-danger btn-sm flex-fill" onclick="return confirm('Tem certeza que deseja apagar?')">
-                        <i class="bi bi-trash"></i> Excluir
-                    </a>
+                    <form action="excluir_insumo.php" method="POST" class="flex-fill" onsubmit="return confirm('Tem certeza que deseja apagar?')">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                        <input type="hidden" name="id" value="<?= intval($i['id']) ?>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

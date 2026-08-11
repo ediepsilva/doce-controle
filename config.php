@@ -149,6 +149,98 @@ function doce_coluna_existe($pdo, $tabela, $coluna)
     }
 }
 
+function doce_ip_cliente()
+{
+    return $_SERVER['REMOTE_ADDR'] ?? 'desconhecido';
+}
+
+function doce_arquivo_tentativas_login()
+{
+    $pasta = __DIR__ . DIRECTORY_SEPARATOR . 'sessions';
+    if (!is_dir($pasta)) {
+        mkdir($pasta, 0777, true);
+    }
+    return $pasta . DIRECTORY_SEPARATOR . '.login_attempts.json';
+}
+
+function doce_login_tentativas_recentes($chave)
+{
+    $arquivo = doce_arquivo_tentativas_login();
+    if (!is_file($arquivo)) {
+        return [];
+    }
+
+    $dados = json_decode((string)@file_get_contents($arquivo), true);
+    if (!is_array($dados) || empty($dados[$chave]) || !is_array($dados[$chave])) {
+        return [];
+    }
+
+    $limite = time() - 900; // janela de 15 minutos
+    return array_values(array_filter($dados[$chave], function ($t) use ($limite) {
+        return $t > $limite;
+    }));
+}
+
+function doce_login_bloqueado($chave)
+{
+    return count(doce_login_tentativas_recentes($chave)) >= 5;
+}
+
+function doce_registrar_falha_login($chave)
+{
+    $fp = @fopen(doce_arquivo_tentativas_login(), 'c+');
+    if (!$fp) {
+        return;
+    }
+
+    flock($fp, LOCK_EX);
+    $dados = json_decode((string)stream_get_contents($fp), true);
+    if (!is_array($dados)) {
+        $dados = [];
+    }
+
+    $limite = time() - 900;
+    $tentativas = !empty($dados[$chave]) && is_array($dados[$chave])
+        ? array_values(array_filter($dados[$chave], function ($t) use ($limite) {
+            return $t > $limite;
+        }))
+        : [];
+    $tentativas[] = time();
+    $dados[$chave] = $tentativas;
+
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($dados));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+}
+
+function doce_limpar_tentativas_login($chave)
+{
+    $arquivo = doce_arquivo_tentativas_login();
+    if (!is_file($arquivo)) {
+        return;
+    }
+
+    $fp = @fopen($arquivo, 'c+');
+    if (!$fp) {
+        return;
+    }
+
+    flock($fp, LOCK_EX);
+    $dados = json_decode((string)stream_get_contents($fp), true);
+    if (is_array($dados) && isset($dados[$chave])) {
+        unset($dados[$chave]);
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($dados));
+        fflush($fp);
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+}
+
 function doce_usuario_logado()
 {
     return !empty($_SESSION['user_id']);
@@ -253,6 +345,28 @@ function doce_garantir_coluna_imagem_receita($pdo)
     }
 }
 
+function doce_garantir_migracoes($pdo)
+{
+    // Versao das checagens abaixo: aumente ao adicionar uma nova coluna/tabela
+    // as funcoes doce_garantir_* para forcar a checagem novamente uma vez.
+    $versaoMigracoes = '2026-08-10-1';
+    $arquivoMarcador = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR . '.schema_ok';
+
+    if (is_file($arquivoMarcador) && trim((string)@file_get_contents($arquivoMarcador)) === $versaoMigracoes) {
+        return;
+    }
+
+    doce_garantir_coluna_imagem_receita($pdo);
+    doce_garantir_colunas_usuario($pdo);
+    doce_garantir_colunas_pedidos($pdo);
+
+    $pasta = dirname($arquivoMarcador);
+    if (!is_dir($pasta)) {
+        mkdir($pasta, 0777, true);
+    }
+    @file_put_contents($arquivoMarcador, $versaoMigracoes);
+}
+
 function doce_usuario_inativo($pdo, $user_id)
 {
     if (!doce_tabela_existe($pdo, 'users')) {
@@ -309,9 +423,7 @@ $paginasPermitidasInativo = [
     'api_receitas_publicas.php',
 ];
 
-doce_garantir_coluna_imagem_receita($pdo);
-doce_garantir_colunas_usuario($pdo);
-doce_garantir_colunas_pedidos($pdo);
+doce_garantir_migracoes($pdo);
 
 if (!in_array($paginaAtual, $paginasSemLogin, true) && !doce_usuario_logado()) {
     header('Location: login.php');

@@ -3,9 +3,9 @@ require_once 'config.php';
 
 $receita_id = 0;
 
-if (isset($_GET['id'], $_GET['receita_id'])) {
-    $id = intval($_GET['id']);
-    $receita_id = intval($_GET['receita_id']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf() && isset($_POST['id'], $_POST['receita_id'])) {
+    $id = intval($_POST['id']);
+    $receita_id = intval($_POST['receita_id']);
     $user_id = $_SESSION['user_id'];
 
     $stmt = $pdo->prepare("SELECT id FROM receitas WHERE id = ? AND user_id = ?");

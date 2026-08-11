@@ -109,6 +109,7 @@ $descricaoPublica = $receita['descricao_publica'] ?? '';
                                     <div class="card-body">
                                         <h6 class="fw-bold mb-3">Ingredientes</h6>
                                         <form action="salvar_item_receita.php" method="POST" class="mb-3">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                                             <input type="hidden" name="receita_id" value="<?= $receita['id'] ?>">
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Insumo</label>
@@ -139,7 +140,12 @@ $descricaoPublica = $receita['descricao_publica'] ?? '';
                                                             <small class="text-muted">Quantidade: <?= number_format($item['quantidade_usada'], 3, ',', '.') ?> <?= htmlspecialchars($item['unidade_medida']) ?></small>
                                                             <div class="small text-muted">Custo: R$ <?= number_format($item['custo_item'], 2, ',', '.') ?></div>
                                                         </div>
-                                                        <a href="excluir_item_receita.php?id=<?= $item['id'] ?>&receita_id=<?= $receita['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">Remover</a>
+                                                        <form action="excluir_item_receita.php" method="POST" class="d-inline" onsubmit="return confirm('Remover este item?')">
+                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
+                                                            <input type="hidden" name="id" value="<?= intval($item['id']) ?>">
+                                                            <input type="hidden" name="receita_id" value="<?= intval($receita['id']) ?>">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                                                        </form>
                                                     </div>
                                                 <?php endforeach; ?>
                                             </div>

@@ -12,9 +12,12 @@ $email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim((string)($_POST['email'] ?? ''));
     $senha = (string)($_POST['senha'] ?? '');
+    $chaveLimite = doce_ip_cliente() . '|' . strtolower($email);
 
     if ($email === '' || $senha === '') {
         $erro = 'Informe e-mail e senha.';
+    } elseif (doce_login_bloqueado($chaveLimite)) {
+        $erro = 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
     } elseif (!doce_tabela_existe($pdo, 'users') || !doce_coluna_existe($pdo, 'users', 'password_hash')) {
         $erro = 'Tabela de usuarios nao encontrada. Execute o arquivo schema.sql no banco.';
     } else {
@@ -25,12 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($usuario && empty($usuario['password_hash'])) {
             $erro = 'Sua conta ainda nao tem senha cadastrada. Use "Esqueci minha senha" para criar uma nova senha.';
         } elseif ($usuario && doce_verificar_senha($senha, $usuario['password_hash'])) {
+            doce_limpar_tentativas_login($chaveLimite);
             session_regenerate_id(true);
             $_SESSION['user_id'] = intval($usuario['id']);
             $_SESSION['user_nome'] = $usuario['nome'];
             header('Location: index.php');
             exit;
         } else {
+            doce_registrar_falha_login($chaveLimite);
             $erro = 'E-mail ou senha invalidos.';
         }
     }

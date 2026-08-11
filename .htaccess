@@ -4,6 +4,10 @@ Options -Indexes
     Require all denied
 </FilesMatch>
 
-<FilesMatch "^(schema|database_updates)\.sql$">
+<FilesMatch "\.(sql|zip|bak|log)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^testar_conexao\.php$">
     Require all denied
 </FilesMatch>

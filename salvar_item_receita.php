@@ -3,7 +3,7 @@ require_once 'config.php';
 
 $receita_id = 0;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf()) {
     $user_id = $_SESSION['user_id'];
     $receita_id = intval($_POST['receita_id']);
     $insumo_id = intval($_POST['insumo_id']);
