@@ -156,6 +156,18 @@ $receitas = $stmt->fetchAll();
 </nav>
 
 <div class="container">
+    <?php
+        $mensagensErroPedido = [
+            'cliente' => 'Selecione um cliente valido para a encomenda.',
+            'receita' => 'Selecione uma receita valida para a encomenda.',
+            'quantidade' => 'Informe uma quantidade maior que zero.',
+            'data' => 'Informe a data de entrega da encomenda.',
+        ];
+        $erroPedido = (string)($_GET['erro'] ?? '');
+    ?>
+    <?php if (isset($mensagensErroPedido[$erroPedido])): ?>
+        <div class="alert alert-danger mt-3"><?= htmlspecialchars($mensagensErroPedido[$erroPedido]) ?></div>
+    <?php endif; ?>
     <div class="row mb-3">
         <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
             <div>
@@ -163,7 +175,7 @@ $receitas = $stmt->fetchAll();
                 <p class="text-muted mb-0">Acompanhe prazos, valores em aberto e avance cada encomenda pelo fluxo.</p>
                 <?php if ($clienteFiltrado): ?>
                     <div class="mt-2">
-                        <span class="badge bg-secondary">Filtrando histÃ³rico de: <?= htmlspecialchars($clienteFiltrado) ?></span>
+                        <span class="badge bg-secondary">Filtrando histórico de: <?= htmlspecialchars($clienteFiltrado) ?></span>
                         <a href="pedidos.php" class="btn btn-sm btn-outline-secondary ms-2">Limpar filtro</a>
                     </div>
                 <?php endif; ?>

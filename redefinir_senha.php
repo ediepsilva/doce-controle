@@ -73,7 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $erro === '') {
                     $assunto = 'Redefinicao de senha - Doce Controle';
                     $mensagem = "Ola, {$usuario['nome']}.\n\nUse este link para criar uma nova senha:\n{$link}\n\nO link expira em 30 minutos.";
                     $headers = "Content-Type: text/plain; charset=UTF-8\r\n";
-                    @mail($usuario['email'], $assunto, $mensagem, $headers);
+                    if (!@mail($usuario['email'], $assunto, $mensagem, $headers)) {
+                        error_log('Doce Controle: falha ao enviar e-mail de redefinicao de senha (user_id ' . intval($usuario['id']) . ')');
+                    }
+                } else {
+                    error_log('Doce Controle: nao foi possivel montar o link de redefinicao (APP_URL ausente/invalido; user_id ' . intval($usuario['id']) . ')');
                 }
             }
 

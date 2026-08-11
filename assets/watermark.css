@@ -43,15 +43,36 @@ body > * {
 .btn-primary,
 .btn-warning,
 .btn-danger,
-.btn-info,
-.badge.bg-success,
-.badge.bg-primary,
-.badge.bg-warning,
-.badge.bg-danger,
-.badge.bg-info {
+.btn-info {
     background-color: #ff007f !important;
     border-color: #ff007f !important;
     color: #ffffff !important;
+}
+
+/* Badges de status (ex: prazo de pedidos) precisam manter as cores
+   semanticas do Bootstrap para o codigo de cores continuar legivel. */
+.badge.bg-success {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+    border-color: #0dcaf0 !important;
+    color: #212529 !important;
 }
 
 .border-success,
