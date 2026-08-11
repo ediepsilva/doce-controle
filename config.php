@@ -319,6 +319,34 @@ function doce_garantir_colunas_pedidos($pdo)
     }
 }
 
+function doce_garantir_fk_user($pdo, $tabela, $colunaFk)
+{
+    // Bancos antigos (de antes da tabela "users" existir) podem ter
+    // "receitas"/"pedidos" referenciando a tabela legada "usuarios" por
+    // engano, o que quebra o INSERT para qualquer conta que nao seja a
+    // primeira criada. Corrige a foreign key para apontar para "users".
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT CONSTRAINT_NAME, REFERENCED_TABLE_NAME
+             FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+               AND REFERENCED_TABLE_NAME IS NOT NULL
+             LIMIT 1"
+        );
+        $stmt->execute([$tabela, $colunaFk]);
+        $fk = $stmt->fetch();
+
+        if (!$fk || $fk['REFERENCED_TABLE_NAME'] === 'users') {
+            return;
+        }
+
+        $pdo->exec("ALTER TABLE `{$tabela}` DROP FOREIGN KEY `{$fk['CONSTRAINT_NAME']}`");
+        $pdo->exec("ALTER TABLE `{$tabela}` ADD CONSTRAINT `fk_{$tabela}_user` FOREIGN KEY (`{$colunaFk}`) REFERENCES users(id) ON DELETE CASCADE");
+    } catch (Exception $e) {
+        // Mantem o app funcionando mesmo quando o banco nao permite ALTER TABLE.
+    }
+}
+
 function doce_garantir_coluna_imagem_receita($pdo)
 {
     if (!doce_tabela_existe($pdo, 'receitas')) {
@@ -350,7 +378,7 @@ function doce_garantir_migracoes($pdo)
 {
     // Versao das checagens abaixo: aumente ao adicionar uma nova coluna/tabela
     // as funcoes doce_garantir_* para forcar a checagem novamente uma vez.
-    $versaoMigracoes = '2026-08-10-2';
+    $versaoMigracoes = '2026-08-10-3';
     $arquivoMarcador = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR . '.schema_ok';
 
     if (is_file($arquivoMarcador) && trim((string)@file_get_contents($arquivoMarcador)) === $versaoMigracoes) {
@@ -360,6 +388,8 @@ function doce_garantir_migracoes($pdo)
     doce_garantir_coluna_imagem_receita($pdo);
     doce_garantir_colunas_usuario($pdo);
     doce_garantir_colunas_pedidos($pdo);
+    doce_garantir_fk_user($pdo, 'receitas', 'user_id');
+    doce_garantir_fk_user($pdo, 'pedidos', 'user_id');
 
     $pasta = dirname($arquivoMarcador);
     if (!is_dir($pasta)) {

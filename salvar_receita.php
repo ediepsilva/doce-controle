@@ -233,8 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf()) {
 {
     $user_id = $_SESSION['user_id'];
     $nome = filter_input(INPUT_POST, 'nome_receita', FILTER_SANITIZE_SPECIAL_CHARS);
-    $rendimento = intval($_POST['rendimento_porcoes']);
-    $preco = floatval($_POST['preco_venda_sugerido']);
+    $rendimento = intval($_POST['rendimento_porcoes'] ?? 0);
+    $preco = floatval($_POST['preco_venda_sugerido'] ?? 0);
     $id = isset($_POST['id']) ? intval($_POST['id']) : null;
     $receita_publica_id = intval($_POST['receita_publica_id'] ?? 0);
     $mostrarCardapio = isset($_POST['mostrar_cardapio']) ? 1 : 0;
@@ -366,12 +366,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf()) {
 
             $stmt = $pdo->prepare("INSERT INTO receitas (" . implode(', ', $colunas) . ") VALUES (" . implode(', ', $placeholders) . ")");
             $stmt->execute($valores);
+            $receitaId = intval($pdo->lastInsertId());
+
             if ($receita_publica_id > 0) {
-                importar_ingredientes_receita_publica($pdo, $user_id, intval($pdo->lastInsertId()), $receita_publica_id);
+                importar_ingredientes_receita_publica($pdo, $user_id, $receitaId, $receita_publica_id);
             }
 
             if ($temIngredientesTexto && $ingredientesTexto !== '') {
-                $receitaId = intval($pdo->lastInsertId());
                 $pdo->prepare("DELETE FROM receitas_itens WHERE receita_id = ?")->execute([$receitaId]);
                 $linhas = preg_split('/\r\n|\r|\n/', $ingredientesTexto);
                 $insertItem = $pdo->prepare("INSERT INTO receitas_itens (receita_id, insumo_id, quantidade_usada) VALUES (?, ?, ?)");
@@ -388,7 +389,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf()) {
             }
 
             if ($temMostrarCardapio) {
-                $receitaId = intval($pdo->lastInsertId());
                 $mostrarCardapio = $mostrarCardapio && receita_tem_todos_ingredientes_com_preco($pdo, $receitaId);
                 $stmt = $pdo->prepare("UPDATE receitas SET mostrar_cardapio = ? WHERE id = ? AND user_id = ?");
                 $stmt->execute([$mostrarCardapio, $receitaId, $user_id]);
