@@ -290,6 +290,7 @@ function doce_garantir_colunas_usuario($pdo)
     $colunas = [
         'whatsapp' => "ALTER TABLE users ADD COLUMN whatsapp VARCHAR(40) NULL",
         'logo_marca' => "ALTER TABLE users ADD COLUMN logo_marca VARCHAR(255) NULL",
+        'criado_em' => "ALTER TABLE users ADD COLUMN criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
     ];
 
     foreach ($colunas as $coluna => $sql) {
@@ -349,7 +350,7 @@ function doce_garantir_migracoes($pdo)
 {
     // Versao das checagens abaixo: aumente ao adicionar uma nova coluna/tabela
     // as funcoes doce_garantir_* para forcar a checagem novamente uma vez.
-    $versaoMigracoes = '2026-08-10-1';
+    $versaoMigracoes = '2026-08-10-2';
     $arquivoMarcador = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR . '.schema_ok';
 
     if (is_file($arquivoMarcador) && trim((string)@file_get_contents($arquivoMarcador)) === $versaoMigracoes) {
