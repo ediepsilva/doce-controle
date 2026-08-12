@@ -109,6 +109,37 @@ function cardapio_imagem_produto($produto)
 
     return $imagemMarca;
 }
+
+$pedidoResumo = null;
+$resultadoPedidoGet = (string)($_GET['pedido'] ?? '');
+$codigoPedidoGet = trim((string)($_GET['codigo'] ?? ''));
+if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_existe($pdo, 'pedidos', 'codigo_pedido')) {
+    $stmtResumo = $pdo->prepare(
+        "SELECT p.quantidade, p.valor_total, p.data_entrega, p.nome_recebedor, p.endereco_entrega, r.nome_receita
+         FROM pedidos p
+         INNER JOIN receitas r ON r.id = p.receita_id
+         WHERE p.codigo_pedido = ? AND p.user_id = ?
+         ORDER BY p.id ASC"
+    );
+    $stmtResumo->execute([$codigoPedidoGet, $user_id]);
+    $itensPedidoResumo = $stmtResumo->fetchAll();
+
+    if ($itensPedidoResumo) {
+        $totalPedidoResumo = 0;
+        foreach ($itensPedidoResumo as $itemPedidoResumo) {
+            $totalPedidoResumo += floatval($itemPedidoResumo['valor_total']);
+        }
+
+        $pedidoResumo = [
+            'codigo' => $codigoPedidoGet,
+            'itens' => $itensPedidoResumo,
+            'total' => $totalPedidoResumo,
+            'data_entrega' => $itensPedidoResumo[0]['data_entrega'],
+            'nome_recebedor' => $itensPedidoResumo[0]['nome_recebedor'],
+            'endereco_entrega' => $itensPedidoResumo[0]['endereco_entrega'],
+        ];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -300,6 +331,63 @@ function cardapio_imagem_produto($produto)
             transform: translateY(-2px);
         }
 
+        .floating-cart {
+            position: fixed;
+            right: 1rem;
+            bottom: 4.6rem;
+            z-index: 10;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--rosa);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 28px rgba(255, 0, 127, 0.34);
+            border: none;
+            font-size: 1.4rem;
+        }
+
+        .floating-cart .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--verde);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .cart-item-row {
+            border-bottom: 1px solid rgba(255, 0, 127, 0.12);
+            padding: 0.75rem 0;
+        }
+
+        .qty-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .qty-control input {
+            width: 54px;
+            text-align: center;
+        }
+
+        .success-card {
+            border: 1px solid rgba(34, 160, 107, 0.35);
+            border-radius: 8px;
+            background: rgba(34, 160, 107, 0.06);
+        }
+
         @media (max-width: 767px) {
             .hero {
                 min-height: auto;
@@ -356,15 +444,48 @@ function cardapio_imagem_produto($produto)
             <?php
                 $resultadoPedido = (string)($_GET['pedido'] ?? '');
                 $mensagensPedido = [
-                    'sucesso' => ['success', 'Pedido enviado! A confeitaria recebeu sua encomenda.'],
                     'dados' => ['warning', 'Confira seus dados e tente enviar o pedido novamente.'],
                     'data' => ['warning', 'Escolha uma data e horario de entrega futuros.'],
-                    'produto' => ['warning', 'Este produto nao esta mais disponivel no cardapio.'],
+                    'produto' => ['warning', 'Um dos produtos do carrinho nao esta mais disponivel no cardapio.'],
                     'aguarde' => ['warning', 'Aguarde alguns segundos antes de enviar outro pedido.'],
                     'erro' => ['danger', 'Nao foi possivel enviar o pedido agora. Tente novamente.'],
                 ];
             ?>
-            <?php if (isset($mensagensPedido[$resultadoPedido])): ?>
+            <?php if ($resultadoPedido === 'sucesso' && $pedidoResumo): ?>
+                <div class="success-card p-4 p-md-5 mb-4" id="resumoPedidoSucesso">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <span class="price-pill" style="background: rgba(34,160,107,0.18); color:#116442;"><i class="bi bi-check-circle-fill"></i></span>
+                        <div>
+                            <h2 class="h4 fw-bold mb-1" style="color:#116442;">Pedido realizado com sucesso!</h2>
+                            <p class="text-muted mb-0">A confeitaria recebeu sua encomenda <strong>#<?= htmlspecialchars($pedidoResumo['codigo']) ?></strong>. Confira o resumo abaixo.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-7">
+                            <strong class="d-block mb-2">Itens do pedido</strong>
+                            <?php foreach ($pedidoResumo['itens'] as $itemResumo): ?>
+                                <div class="d-flex justify-content-between border-bottom py-1">
+                                    <span><?= intval($itemResumo['quantidade']) ?>x <?= htmlspecialchars($itemResumo['nome_receita']) ?></span>
+                                    <strong>R$ <?= number_format($itemResumo['valor_total'], 2, ',', '.') ?></strong>
+                                </div>
+                            <?php endforeach; ?>
+                            <div class="d-flex justify-content-between pt-2">
+                                <strong>Total</strong>
+                                <strong>R$ <?= number_format($pedidoResumo['total'], 2, ',', '.') ?></strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <strong class="d-block mb-2">Entrega</strong>
+                            <p class="mb-1 small"><i class="bi bi-calendar-event"></i> <?= date('d/m/Y \à\s H:i', strtotime($pedidoResumo['data_entrega'])) ?></p>
+                            <p class="mb-1 small"><i class="bi bi-person"></i> <?= htmlspecialchars($pedidoResumo['nome_recebedor'] ?? '') ?></p>
+                            <p class="mb-0 small"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($pedidoResumo['endereco_entrega'] ?? '') ?></p>
+                        </div>
+                    </div>
+                    <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'confirmar os detalhes do pedido #' . $pedidoResumo['codigo'])) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink">
+                        <i class="bi bi-whatsapp"></i> Acompanhar pelo WhatsApp
+                    </a>
+                </div>
+            <?php elseif (isset($mensagensPedido[$resultadoPedido])): ?>
                 <div class="alert alert-<?= $mensagensPedido[$resultadoPedido][0] ?> shadow-sm mb-4" role="alert">
                     <?= htmlspecialchars($mensagensPedido[$resultadoPedido][1]) ?>
                 </div>
@@ -416,17 +537,18 @@ function cardapio_imagem_produto($produto)
                                         <i class="bi bi-stars"></i>
                                         Ideal para encomendas, festas e presentes.
                                     </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-pink mt-auto w-100 js-pedir"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalPedidoPublico"
-                                        data-receita-id="<?= intval($produto['id']) ?>"
-                                        data-produto="<?= htmlspecialchars($nomeProduto) ?>"
-                                        data-preco="<?= htmlspecialchars(number_format($preco, 2, ',', '.')) ?>"
-                                    >
-                                        <i class="bi bi-bag-check"></i> Fazer pedido
-                                    </button>
+                                    <div class="d-flex gap-2 mt-auto">
+                                        <input type="number" class="form-control" style="max-width: 78px;" min="1" max="100" value="1" id="qtd-<?= intval($produto['id']) ?>" aria-label="Quantidade">
+                                        <button
+                                            type="button"
+                                            class="btn btn-pink flex-grow-1 js-adicionar-carrinho"
+                                            data-receita-id="<?= intval($produto['id']) ?>"
+                                            data-produto="<?= htmlspecialchars($nomeProduto) ?>"
+                                            data-preco="<?= htmlspecialchars(number_format($preco, 2, ',', '.')) ?>"
+                                        >
+                                            <i class="bi bi-bag-plus"></i> Adicionar ao carrinho
+                                        </button>
+                                    </div>
                                 </div>
                             </article>
                         </div>
@@ -440,46 +562,86 @@ function cardapio_imagem_produto($produto)
         </div>
     </main>
 
-    <div class="modal fade" id="modalPedidoPublico" tabindex="-1" aria-labelledby="tituloPedidoPublico" aria-hidden="true">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrinho" aria-labelledby="tituloCarrinho">
+        <div class="offcanvas-header border-bottom">
+            <h2 class="offcanvas-title h5 fw-bold" id="tituloCarrinho"><i class="bi bi-bag-heart"></i> Meu carrinho</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <div id="carrinhoLista" class="flex-grow-1"></div>
+            <div id="carrinhoVazio" class="empty-state p-4 text-center d-none">
+                <p class="text-muted mb-0">Seu carrinho esta vazio. Escolha um doce no cardapio.</p>
+            </div>
+            <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between fw-bold h5 mb-3">
+                    <span>Total</span>
+                    <span id="carrinhoTotal">R$ 0,00</span>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-pink btn-lg" id="btnFinalizarSite" data-bs-toggle="modal" data-bs-target="#modalCheckout">
+                        <i class="bi bi-bag-check"></i> Finalizar pedido no site
+                    </button>
+                    <a href="#" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg" id="btnFinalizarWhatsapp" data-numero="<?= htmlspecialchars(preg_replace('/\D+/', '', $whatsapp)) ?>">
+                        <i class="bi bi-whatsapp"></i> Pedir pelo WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalCheckout" tabindex="-1" aria-labelledby="tituloCheckout" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <form action="salvar_pedido_publico.php" method="POST">
+                <form action="salvar_pedido_publico.php" method="POST" id="formCheckout">
                     <div class="modal-header">
                         <div>
-                            <h2 class="modal-title h5 fw-bold mb-1" id="tituloPedidoPublico">Fazer pedido</h2>
-                            <div class="text-muted small" id="resumoProdutoPedido"></div>
+                            <h2 class="modal-title h5 fw-bold mb-1" id="tituloCheckout">Finalizar pedido</h2>
+                            <div class="text-muted small" id="resumoCarrinhoCheckout"></div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                         <input type="hidden" name="user_id" value="<?= intval($user_id) ?>">
-                        <input type="hidden" name="receita_id" id="pedidoReceitaId" value="">
+                        <input type="hidden" name="itens_json" id="checkoutItensJson" value="">
                         <div class="position-absolute opacity-0" style="pointer-events:none;" aria-hidden="true">
                             <label for="pedidoWebsite">Website</label>
                             <input type="text" name="website" id="pedidoWebsite" tabindex="-1" autocomplete="off">
                         </div>
 
-                        <div class="row g-3">
+                        <h3 class="h6 fw-bold text-uppercase" style="color: var(--rosa);">Dados de identificacao</h3>
+                        <div class="row g-3 mb-3">
                             <div class="col-12 col-md-7">
-                                <label for="pedidoNome" class="form-label fw-bold">Seu nome</label>
+                                <label for="pedidoNome" class="form-label fw-bold">Nome completo</label>
                                 <input type="text" class="form-control" name="nome" id="pedidoNome" maxlength="160" autocomplete="name" required>
                             </div>
                             <div class="col-12 col-md-5">
                                 <label for="pedidoWhatsapp" class="form-label fw-bold">WhatsApp</label>
                                 <input type="tel" class="form-control" name="whatsapp" id="pedidoWhatsapp" maxlength="20" placeholder="(00) 00000-0000" autocomplete="tel" required>
                             </div>
-                            <div class="col-12 col-md-7">
+                            <div class="col-12">
                                 <label for="pedidoEmail" class="form-label fw-bold">E-mail <span class="text-muted fw-normal">(opcional)</span></label>
                                 <input type="email" class="form-control" name="email" id="pedidoEmail" maxlength="160" autocomplete="email">
                             </div>
-                            <div class="col-5 col-md-3">
-                                <label for="pedidoQuantidade" class="form-label fw-bold">Quantidade</label>
-                                <input type="number" class="form-control" name="quantidade" id="pedidoQuantidade" min="1" max="100" value="1" required>
+                        </div>
+
+                        <h3 class="h6 fw-bold text-uppercase" style="color: var(--rosa);">Dados de entrega</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="pedidoEndereco" class="form-label fw-bold">Endereco de entrega completo</label>
+                                <input type="text" class="form-control" name="endereco_entrega" id="pedidoEndereco" maxlength="255" placeholder="Rua, numero, bairro, cidade" required>
                             </div>
-                            <div class="col-12 col-md-7">
-                                <label for="pedidoDataEntrega" class="form-label fw-bold">Data e horario desejados</label>
-                                <input type="datetime-local" class="form-control" name="data_entrega" id="pedidoDataEntrega" min="<?= date('Y-m-d\TH:i') ?>" required>
+                            <div class="col-12 col-md-6">
+                                <label for="pedidoRecebedor" class="form-label fw-bold">Nome de quem vai receber</label>
+                                <input type="text" class="form-control" name="nome_recebedor" id="pedidoRecebedor" maxlength="160" required>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="pedidoDataEntrega" class="form-label fw-bold">Data de entrega</label>
+                                <input type="date" class="form-control" name="data_entrega" id="pedidoDataEntrega" min="<?= date('Y-m-d') ?>" required>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="pedidoHorarioEntrega" class="form-label fw-bold">Horario <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="time" class="form-control" name="horario_entrega" id="pedidoHorarioEntrega">
                             </div>
                             <div class="col-12">
                                 <label for="pedidoObservacoes" class="form-label fw-bold">Observacoes <span class="text-muted fw-normal">(opcional)</span></label>
@@ -510,6 +672,11 @@ function cardapio_imagem_produto($produto)
         </div>
     </footer>
 
+    <button type="button" class="floating-cart" id="btnAbrirCarrinho" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCarrinho" aria-controls="offcanvasCarrinho" aria-label="Abrir carrinho">
+        <i class="bi bi-bag-heart"></i>
+        <span class="cart-badge d-none" id="carrinhoBadge">0</span>
+    </button>
+
     <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda')) ?>" target="_blank" rel="noopener" class="floating-whatsapp" aria-label="Falar no WhatsApp">
         <i class="bi bi-whatsapp"></i>
     </a>
@@ -539,13 +706,199 @@ function cardapio_imagem_produto($produto)
             });
         }
 
-        document.querySelectorAll('.js-pedir').forEach(button => {
+        const CARRINHO_CHAVE = 'doce_carrinho_<?= intval($user_id) ?>';
+        const pedidoFoiSucesso = <?= $pedidoResumo ? 'true' : 'false' ?>;
+
+        function escapeHtml(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+
+        function parsePrecoBr(precoStr) {
+            return parseFloat(String(precoStr).replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        function formatarMoeda(valor) {
+            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+        }
+
+        function carregarCarrinho() {
+            try {
+                const dados = JSON.parse(localStorage.getItem(CARRINHO_CHAVE) || '[]');
+                return Array.isArray(dados) ? dados : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function salvarCarrinho(itens) {
+            localStorage.setItem(CARRINHO_CHAVE, JSON.stringify(itens));
+        }
+
+        let carrinho = pedidoFoiSucesso ? [] : carregarCarrinho();
+        if (pedidoFoiSucesso) {
+            salvarCarrinho([]);
+        }
+
+        function calcularTotalCarrinho() {
+            return carrinho.reduce((total, item) => total + (item.preco * item.quantidade), 0);
+        }
+
+        function renderizarCarrinho() {
+            const lista = document.getElementById('carrinhoLista');
+            const vazio = document.getElementById('carrinhoVazio');
+            const totalEl = document.getElementById('carrinhoTotal');
+            const badge = document.getElementById('carrinhoBadge');
+            const btnSite = document.getElementById('btnFinalizarSite');
+            const btnWhats = document.getElementById('btnFinalizarWhatsapp');
+
+            if (!lista) {
+                return;
+            }
+
+            lista.innerHTML = '';
+
+            if (carrinho.length === 0) {
+                vazio.classList.remove('d-none');
+                if (btnSite) btnSite.disabled = true;
+                if (btnWhats) btnWhats.classList.add('disabled');
+            } else {
+                vazio.classList.add('d-none');
+                if (btnSite) btnSite.disabled = false;
+                if (btnWhats) btnWhats.classList.remove('disabled');
+
+                carrinho.forEach(item => {
+                    const linha = document.createElement('div');
+                    linha.className = 'cart-item-row d-flex justify-content-between align-items-center';
+                    linha.dataset.cartId = item.id;
+                    linha.innerHTML = `
+                        <div class="flex-grow-1 me-2">
+                            <div class="fw-bold">${escapeHtml(item.nome)}</div>
+                            <div class="text-muted small">${formatarMoeda(item.preco)} cada</div>
+                        </div>
+                        <div class="qty-control">
+                            <button type="button" class="btn btn-sm btn-outline-secondary js-cart-dec" data-id="${item.id}">-</button>
+                            <input type="number" min="1" max="100" value="${item.quantidade}" class="form-control form-control-sm js-cart-qty" data-id="${item.id}">
+                            <button type="button" class="btn btn-sm btn-outline-secondary js-cart-inc" data-id="${item.id}">+</button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-danger js-cart-remove" data-id="${item.id}" aria-label="Remover"><i class="bi bi-trash"></i></button>
+                    `;
+                    lista.appendChild(linha);
+                });
+            }
+
+            const total = calcularTotalCarrinho();
+            const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
+
+            totalEl.textContent = formatarMoeda(total);
+
+            if (badge) {
+                badge.textContent = totalItens;
+                badge.classList.toggle('d-none', totalItens === 0);
+            }
+
+            const resumoCheckout = document.getElementById('resumoCarrinhoCheckout');
+            if (resumoCheckout) {
+                resumoCheckout.textContent = totalItens > 0
+                    ? `${totalItens} item(ns) - ${formatarMoeda(total)}`
+                    : '';
+            }
+
+            if (btnWhats) {
+                const numero = btnWhats.dataset.numero || '';
+                const resumoTexto = carrinho.map(item => `${item.quantidade}x ${item.nome}`).join(', ');
+                const mensagem = 'Ola! Vim pelo cardapio e quero pedir: ' + resumoTexto
+                    + (resumoTexto ? ` (Total: ${formatarMoeda(total)})` : '');
+                const base = numero
+                    ? `https://wa.me/${numero.indexOf('55') === 0 ? numero : '55' + numero}`
+                    : 'https://api.whatsapp.com/send';
+                btnWhats.href = base + '?text=' + encodeURIComponent(mensagem);
+            }
+        }
+
+        function adicionarAoCarrinho(id, nome, preco, quantidade) {
+            const existente = carrinho.find(item => item.id === id);
+            if (existente) {
+                existente.quantidade = Math.min(100, existente.quantidade + quantidade);
+            } else {
+                carrinho.push({ id, nome, preco, quantidade: Math.max(1, Math.min(100, quantidade)) });
+            }
+            salvarCarrinho(carrinho);
+            renderizarCarrinho();
+        }
+
+        function removerDoCarrinho(id) {
+            carrinho = carrinho.filter(item => item.id !== id);
+            salvarCarrinho(carrinho);
+            renderizarCarrinho();
+        }
+
+        function alterarQuantidade(id, quantidade) {
+            const item = carrinho.find(i => i.id === id);
+            if (!item) return;
+            item.quantidade = Math.max(1, Math.min(100, quantidade));
+            salvarCarrinho(carrinho);
+            renderizarCarrinho();
+        }
+
+        document.querySelectorAll('.js-adicionar-carrinho').forEach(button => {
             button.addEventListener('click', () => {
-                document.getElementById('pedidoReceitaId').value = button.dataset.receitaId;
-                document.getElementById('resumoProdutoPedido').textContent =
-                    `${button.dataset.produto} - R$ ${button.dataset.preco}`;
+                const id = parseInt(button.dataset.receitaId, 10);
+                const nome = button.dataset.produto;
+                const preco = parsePrecoBr(button.dataset.preco);
+                const inputQtd = document.getElementById('qtd-' + id);
+                const quantidade = inputQtd ? Math.max(1, Math.min(100, parseInt(inputQtd.value, 10) || 1)) : 1;
+
+                adicionarAoCarrinho(id, nome, preco, quantidade);
+
+                if (inputQtd) {
+                    inputQtd.value = 1;
+                }
             });
         });
+
+        const carrinhoLista = document.getElementById('carrinhoLista');
+        if (carrinhoLista) {
+            carrinhoLista.addEventListener('click', (evento) => {
+                const decBtn = evento.target.closest('.js-cart-dec');
+                const incBtn = evento.target.closest('.js-cart-inc');
+                const removeBtn = evento.target.closest('.js-cart-remove');
+
+                if (decBtn) {
+                    const id = parseInt(decBtn.dataset.id, 10);
+                    const item = carrinho.find(i => i.id === id);
+                    if (item) alterarQuantidade(id, item.quantidade - 1);
+                } else if (incBtn) {
+                    const id = parseInt(incBtn.dataset.id, 10);
+                    const item = carrinho.find(i => i.id === id);
+                    if (item) alterarQuantidade(id, item.quantidade + 1);
+                } else if (removeBtn) {
+                    removerDoCarrinho(parseInt(removeBtn.dataset.id, 10));
+                }
+            });
+
+            carrinhoLista.addEventListener('change', (evento) => {
+                if (evento.target.classList.contains('js-cart-qty')) {
+                    const id = parseInt(evento.target.dataset.id, 10);
+                    alterarQuantidade(id, parseInt(evento.target.value, 10) || 1);
+                }
+            });
+        }
+
+        const formCheckout = document.getElementById('formCheckout');
+        if (formCheckout) {
+            formCheckout.addEventListener('submit', (evento) => {
+                if (carrinho.length === 0) {
+                    evento.preventDefault();
+                    return;
+                }
+                const itensJson = carrinho.map(item => ({ receita_id: item.id, quantidade: item.quantidade }));
+                document.getElementById('checkoutItensJson').value = JSON.stringify(itensJson);
+            });
+        }
+
+        renderizarCarrinho();
     </script>
 </body>
 </html>

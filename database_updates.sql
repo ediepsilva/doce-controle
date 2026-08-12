@@ -29,6 +29,13 @@ ALTER TABLE receitas
     ADD COLUMN IF NOT EXISTS mostrar_cardapio TINYINT(1) NOT NULL DEFAULT 1,
     ADD COLUMN IF NOT EXISTS descricao_publica TEXT NULL;
 
+ALTER TABLE pedidos
+    ADD COLUMN IF NOT EXISTS endereco_entrega VARCHAR(255) NULL,
+    ADD COLUMN IF NOT EXISTS nome_recebedor VARCHAR(160) NULL,
+    ADD COLUMN IF NOT EXISTS codigo_pedido VARCHAR(20) NULL,
+    ADD COLUMN IF NOT EXISTS origem VARCHAR(20) NOT NULL DEFAULT 'manual',
+    ADD INDEX IF NOT EXISTS idx_pedidos_codigo (codigo_pedido);
+
 UPDATE users
 SET nome = COALESCE(NULLIF(nome_confeitaria, ''), NULLIF(nome, ''), 'Usuario')
 WHERE nome = 'Usuario' AND nome_confeitaria IS NOT NULL;

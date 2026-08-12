@@ -1,0 +1,14 @@
+# Pacotes e dados locais que nunca devem entrar no ZIP de publicacao
+*.zip
+.git/
+.agents/
+.venv/
+.pytest_cache/
+__pycache__/
+sessions/
+uploads/
+.env
+*.sql
+*.ipynb
+test_*.py
+testar_conexao.php

@@ -374,11 +374,43 @@ function doce_garantir_coluna_imagem_receita($pdo)
     }
 }
 
+function doce_garantir_colunas_entrega_pedidos($pdo)
+{
+    if (!doce_tabela_existe($pdo, 'pedidos')) {
+        return;
+    }
+
+    $colunas = [
+        'endereco_entrega' => "ALTER TABLE pedidos ADD COLUMN endereco_entrega VARCHAR(255) NULL",
+        'nome_recebedor' => "ALTER TABLE pedidos ADD COLUMN nome_recebedor VARCHAR(160) NULL",
+        'codigo_pedido' => "ALTER TABLE pedidos ADD COLUMN codigo_pedido VARCHAR(20) NULL",
+        'origem' => "ALTER TABLE pedidos ADD COLUMN origem VARCHAR(20) NOT NULL DEFAULT 'manual'",
+    ];
+
+    foreach ($colunas as $coluna => $sql) {
+        if (doce_coluna_existe($pdo, 'pedidos', $coluna)) {
+            continue;
+        }
+
+        try {
+            $pdo->exec($sql);
+        } catch (Exception $e) {
+            // Colunas opcionais; se o banco nao permitir ALTER TABLE agora, tenta na proxima requisicao.
+        }
+    }
+
+    try {
+        $pdo->exec("ALTER TABLE pedidos ADD INDEX idx_pedidos_codigo (codigo_pedido)");
+    } catch (Exception $e) {
+        // Indice auxiliar; ignora se ja existir ou nao puder ser criado.
+    }
+}
+
 function doce_garantir_migracoes($pdo)
 {
     // Versao das checagens abaixo: aumente ao adicionar uma nova coluna/tabela
     // as funcoes doce_garantir_* para forcar a checagem novamente uma vez.
-    $versaoMigracoes = '2026-08-10-3';
+    $versaoMigracoes = '2026-08-11-1';
     $arquivoMarcador = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR . '.schema_ok';
 
     if (is_file($arquivoMarcador) && trim((string)@file_get_contents($arquivoMarcador)) === $versaoMigracoes) {
@@ -388,6 +420,7 @@ function doce_garantir_migracoes($pdo)
     doce_garantir_coluna_imagem_receita($pdo);
     doce_garantir_colunas_usuario($pdo);
     doce_garantir_colunas_pedidos($pdo);
+    doce_garantir_colunas_entrega_pedidos($pdo);
     doce_garantir_fk_user($pdo, 'receitas', 'user_id');
     doce_garantir_fk_user($pdo, 'pedidos', 'user_id');
 
