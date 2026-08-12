@@ -153,21 +153,24 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <style>
         :root {
             --rosa: #A04255;
             --rosa-escuro: #7E3040;
-            --dourado: #D4AF37;
+            --dourado: #C59B27;
             --verde: #8A9A86;
-            --texto: #2C2523;
-            --texto-muted: #766B63;
+            --texto: #3D2314;
+            --texto-muted: #5A4033;
             --fundo: #F3ECE1;
-            --creme: #FAF7F2;
+            --creme: #F7EFE5;
+            --creme-claro: #FDF8F2;
             --branco: #FFFFFF;
-            --borda-suave: rgba(44, 37, 35, 0.10);
+            --borda-suave: rgba(61, 35, 20, 0.10);
             --sombra-suave: 0 20px 50px rgba(44, 37, 35, 0.09);
             --sombra-card: 0 14px 32px rgba(44, 37, 35, 0.07);
+            --sombra-quente: 0 26px 60px rgba(61, 35, 20, 0.22);
         }
 
         body {
@@ -202,7 +205,25 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .hero {
+            position: relative;
             padding: 8.5rem 0 4rem;
+            background: radial-gradient(ellipse at center, var(--creme-claro) 0%, var(--creme) 62%, #F0E4D3 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
         }
 
         .hero-grid {
@@ -210,6 +231,10 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             grid-template-columns: 1.05fr 0.95fr;
             gap: 3rem;
             align-items: center;
+        }
+
+        .hero-grid > * {
+            min-width: 0;
         }
 
         .hero-eyebrow {
@@ -228,6 +253,12 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             max-width: 620px;
         }
 
+        .hero h1 em {
+            font-style: italic;
+            font-weight: 800;
+            color: var(--rosa);
+        }
+
         .hero p.lead-copy {
             max-width: 520px;
             font-size: 1.08rem;
@@ -236,26 +267,71 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
         .hero-visual {
             position: relative;
+            min-width: 0;
         }
 
-        .hero-visual-frame {
-            border-radius: 24px;
+        .hero-swiper {
+            width: 100%;
+            height: 600px;
+            min-width: 0;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: var(--sombra-suave);
-            aspect-ratio: 4 / 5;
+            box-shadow: var(--sombra-quente);
         }
 
-        .hero-visual-frame img {
+        .hero-swiper .swiper-wrapper,
+        .hero-swiper .swiper-slide {
+            min-width: 0;
+        }
+
+        .hero-swiper .swiper-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
 
+        .hero-swiper .swiper-pagination-bullet {
+            width: 8px;
+            height: 8px;
+            background: var(--branco);
+            opacity: 0.55;
+        }
+
+        .hero-swiper .swiper-pagination-bullet-active {
+            background: var(--dourado);
+            opacity: 1;
+        }
+
+        .hero-swiper .swiper-button-prev,
+        .hero-swiper .swiper-button-next {
+            width: 38px;
+            height: 38px;
+            background: rgba(250, 247, 242, 0.88);
+            border-radius: 50%;
+            color: var(--rosa);
+            box-shadow: var(--sombra-card);
+        }
+
+        .hero-swiper .swiper-button-prev::after,
+        .hero-swiper .swiper-button-next::after {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .hero-swiper .swiper-button-prev {
+            left: 14px;
+        }
+
+        .hero-swiper .swiper-button-next {
+            right: 14px;
+        }
+
         .hero-badge-float {
             position: absolute;
             left: -1.25rem;
             bottom: -1.25rem;
+            z-index: 5;
             background: var(--branco);
             border-radius: 14px;
             box-shadow: var(--sombra-card);
@@ -564,8 +640,11 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
             .hero-visual {
                 order: -1;
-                max-width: 360px;
-                margin: 0 auto 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .hero-swiper {
+                height: 420px;
             }
 
             .hero p.lead-copy {
@@ -581,6 +660,10 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         @media (max-width: 767px) {
             .hero {
                 padding: 6.5rem 0 2.5rem;
+            }
+
+            .hero-swiper {
+                height: 320px;
             }
         }
     </style>
@@ -603,7 +686,7 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             <div class="hero-grid">
                 <div class="hero-copy">
                     <p class="hero-eyebrow mb-3">Confeitaria Artesanal &amp; Fine Pastry</p>
-                    <h1 class="mb-3">Momentos inesqueciveis pedem doces inesqueciveis.</h1>
+                    <h1 class="mb-3">Momentos <em>inesqueciveis</em> pedem doces <em>artesanais</em>.</h1>
                     <p class="lead-copy mb-4">
                         Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
                     </p>
@@ -617,8 +700,21 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                     </div>
                 </div>
                 <div class="hero-visual">
-                    <div class="hero-visual-frame">
-                        <img src="<?= htmlspecialchars($imagemMarca) ?>" alt="<?= htmlspecialchars($nomeMarca) ?>" loading="eager">
+                    <div class="swiper hero-swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=1600&q=80&auto=format&fit=crop" alt="Bolo de casamento elegante e minimalista com frutas vermelhas e acabamento acetinado" loading="eager">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://images.unsplash.com/photo-1558326567-98ae2405596b?w=1600&q=80&auto=format&fit=crop" alt="Macarons artesanais em tons pastel" loading="lazy">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://images.unsplash.com/photo-1691782503919-6c6af4692e8f?w=1600&q=80&auto=format&fit=crop" alt="Confeiteira polvilhando acucar de confeiteiro sobre uma torta de frutas" loading="lazy">
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
                     </div>
                     <div class="hero-badge-float">
                         <span class="icon-circle"><i class="bi bi-award"></i></span>
@@ -884,7 +980,31 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
     </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
+        const heroSwiperEl = document.querySelector('.hero-swiper');
+        if (heroSwiperEl) {
+            const iniciarHeroSwiper = () => {
+                if (heroSwiperEl.offsetWidth === 0) {
+                    requestAnimationFrame(iniciarHeroSwiper);
+                    return;
+                }
+
+                new Swiper(heroSwiperEl, {
+                    effect: 'fade',
+                    fadeEffect: { crossFade: true },
+                    loop: true,
+                    autoplay: { delay: 5000, disableOnInteraction: false },
+                    speed: 900,
+                    updateOnImagesReady: false,
+                    pagination: { el: '.swiper-pagination', clickable: true },
+                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                });
+            };
+
+            requestAnimationFrame(iniciarHeroSwiper);
+        }
+
         const botoesFluantes = document.querySelectorAll('.floating-cart, .floating-whatsapp');
         function atualizarBotoesFluantes() {
             const mostrar = window.scrollY > 220;
