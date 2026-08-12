@@ -226,15 +226,10 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             z-index: 1;
         }
 
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .hero-grid > * {
-            min-width: 0;
+        .hero-copy {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
         }
 
         .hero-eyebrow {
@@ -250,38 +245,31 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             font-size: clamp(2.2rem, 4.2vw, 3.4rem);
             font-weight: 700;
             line-height: 1.15;
-            max-width: 620px;
         }
 
         .hero h1 em {
             font-style: italic;
             font-weight: 800;
-            color: var(--rosa);
+            color: var(--rosa-escuro);
         }
 
         .hero p.lead-copy {
-            max-width: 520px;
+            max-width: 560px;
+            margin: 0 auto;
             font-size: 1.08rem;
             color: var(--texto-muted);
         }
 
-        .hero-visual {
+        .hero-carousel-full {
             position: relative;
-            min-width: 0;
+            width: 100%;
+            margin-top: 3rem;
         }
 
         .hero-swiper {
             width: 100%;
-            height: 600px;
-            min-width: 0;
-            border-radius: 20px;
+            height: 500px;
             overflow: hidden;
-            box-shadow: var(--sombra-quente);
-        }
-
-        .hero-swiper .swiper-wrapper,
-        .hero-swiper .swiper-slide {
-            min-width: 0;
         }
 
         .hero-swiper .swiper-slide img {
@@ -291,11 +279,25 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             display: block;
         }
 
+        .hero-swiper::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 40%;
+            background: linear-gradient(to top, rgba(30, 16, 10, 0.35), transparent);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .hero-swiper .swiper-pagination {
+            bottom: 18px;
+        }
+
         .hero-swiper .swiper-pagination-bullet {
             width: 8px;
             height: 8px;
             background: var(--branco);
-            opacity: 0.55;
+            opacity: 0.6;
         }
 
         .hero-swiper .swiper-pagination-bullet-active {
@@ -305,11 +307,11 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
         .hero-swiper .swiper-button-prev,
         .hero-swiper .swiper-button-next {
-            width: 38px;
-            height: 38px;
-            background: rgba(250, 247, 242, 0.88);
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 50%;
-            color: var(--rosa);
+            color: var(--rosa-escuro);
             box-shadow: var(--sombra-card);
         }
 
@@ -320,19 +322,19 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .hero-swiper .swiper-button-prev {
-            left: 14px;
+            left: 20px;
         }
 
         .hero-swiper .swiper-button-next {
-            right: 14px;
+            right: 20px;
         }
 
         .hero-badge-float {
             position: absolute;
-            left: -1.25rem;
-            bottom: -1.25rem;
+            left: 1.5rem;
+            bottom: 1.5rem;
             z-index: 5;
-            background: var(--branco);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 14px;
             box-shadow: var(--sombra-card);
             padding: 0.85rem 1.1rem;
@@ -633,27 +635,13 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         @media (max-width: 991px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .hero-visual {
-                order: -1;
-                margin-bottom: 2rem;
-            }
-
             .hero-swiper {
                 height: 420px;
             }
 
-            .hero p.lead-copy {
-                margin-inline: auto;
-            }
-
             .hero-badge-float {
-                left: 0.75rem;
-                bottom: -1rem;
+                left: 1rem;
+                bottom: 1rem;
             }
         }
 
@@ -662,8 +650,19 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                 padding: 6.5rem 0 2.5rem;
             }
 
+            .hero-carousel-full {
+                margin-top: 2rem;
+            }
+
             .hero-swiper {
                 height: 320px;
+            }
+
+            .hero-badge-float {
+                position: static;
+                width: fit-content;
+                max-width: 90%;
+                margin: 1rem auto 0;
             }
         }
     </style>
@@ -683,46 +682,45 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
     <header id="topo" class="hero">
         <div class="container">
-            <div class="hero-grid">
-                <div class="hero-copy">
-                    <p class="hero-eyebrow mb-3">Confeitaria Artesanal &amp; Fine Pastry</p>
-                    <h1 class="mb-3">Momentos <em>inesqueciveis</em> pedem doces <em>artesanais</em>.</h1>
-                    <p class="lead-copy mb-4">
-                        Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
-                    </p>
-                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
-                        <a href="#cardapio" class="btn btn-pink btn-lg">
-                            <i class="bi bi-bag-heart"></i> Explorar o Cardapio
-                        </a>
-                        <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
-                            <i class="bi bi-whatsapp"></i> Encomenda Personalizada
-                        </a>
+            <div class="hero-copy">
+                <p class="hero-eyebrow mb-3">Confeitaria Artesanal &amp; Fine Pastry</p>
+                <h1 class="mb-3">Momentos inesqueciveis pedem<br>doces <em>inesqueciveis</em>.</h1>
+                <p class="lead-copy mb-4">
+                    Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="#cardapio" class="btn btn-pink btn-lg">
+                        <i class="bi bi-bag-heart"></i> Explorar o Cardapio
+                    </a>
+                    <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
+                        <i class="bi bi-whatsapp"></i> Encomenda Personalizada
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-carousel-full">
+            <div class="swiper hero-swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=1920&q=80&auto=format&fit=crop" alt="Bolo de casamento elegante e minimalista com frutas vermelhas e acabamento acetinado" loading="eager">
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="https://images.unsplash.com/photo-1558326567-98ae2405596b?w=1920&q=80&auto=format&fit=crop" alt="Macarons artesanais em tons pastel" loading="lazy">
+                    </div>
+                    <div class="swiper-slide">
+                        <img src="https://images.unsplash.com/photo-1691782503919-6c6af4692e8f?w=1920&q=80&auto=format&fit=crop" alt="Confeiteira polvilhando acucar de confeiteiro sobre uma torta de frutas" loading="lazy">
                     </div>
                 </div>
-                <div class="hero-visual">
-                    <div class="swiper hero-swiper">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=1600&q=80&auto=format&fit=crop" alt="Bolo de casamento elegante e minimalista com frutas vermelhas e acabamento acetinado" loading="eager">
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="https://images.unsplash.com/photo-1558326567-98ae2405596b?w=1600&q=80&auto=format&fit=crop" alt="Macarons artesanais em tons pastel" loading="lazy">
-                            </div>
-                            <div class="swiper-slide">
-                                <img src="https://images.unsplash.com/photo-1691782503919-6c6af4692e8f?w=1600&q=80&auto=format&fit=crop" alt="Confeiteira polvilhando acucar de confeiteiro sobre uma torta de frutas" loading="lazy">
-                            </div>
-                        </div>
-                        <div class="swiper-pagination"></div>
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                    </div>
-                    <div class="hero-badge-float">
-                        <span class="icon-circle"><i class="bi bi-award"></i></span>
-                        <div>
-                            <strong>Feito a mao</strong>
-                            <span>com ingredientes selecionados</span>
-                        </div>
-                    </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+            <div class="hero-badge-float">
+                <span class="icon-circle"><i class="bi bi-award"></i></span>
+                <div>
+                    <strong>Feito a mao</strong>
+                    <span>com ingredientes selecionados</span>
                 </div>
             </div>
         </div>
