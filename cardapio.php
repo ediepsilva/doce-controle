@@ -147,31 +147,43 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ff007f">
+    <meta name="theme-color" content="#A04255">
     <title><?= htmlspecialchars($nomeMarca) ?> - Cardapio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --rosa: #ff007f;
-            --rosa-escuro: #bd005e;
-            --amarelo: #ffd166;
-            --verde: #22a06b;
-            --texto: #24151d;
-            --fundo: #fff7fb;
+            --rosa: #A04255;
+            --rosa-escuro: #7E3040;
+            --dourado: #D4AF37;
+            --verde: #8A9A86;
+            --texto: #2C2523;
+            --texto-muted: #766B63;
+            --fundo: #F3ECE1;
+            --creme: #FAF7F2;
+            --branco: #FFFFFF;
+            --borda-suave: rgba(44, 37, 35, 0.10);
+            --sombra-suave: 0 20px 50px rgba(44, 37, 35, 0.09);
+            --sombra-card: 0 14px 32px rgba(44, 37, 35, 0.07);
         }
 
         body {
             min-height: 100vh;
-            background:
-                linear-gradient(135deg, rgba(255, 0, 127, 0.11), rgba(255, 209, 102, 0.22)),
-                #ffffff;
+            background: var(--creme);
             color: var(--texto);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.94);
-            border-bottom: 1px solid rgba(255, 0, 127, 0.16);
+            background: rgba(250, 247, 242, 0.92);
+            border-bottom: 1px solid var(--borda-suave);
             backdrop-filter: blur(12px);
         }
 
@@ -180,34 +192,103 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--rosa);
+            border: 2px solid var(--dourado);
+        }
+
+        .navbar-brand span {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.15rem;
         }
 
         .hero {
-            min-height: 88vh;
+            padding: 8.5rem 0 4rem;
+        }
+
+        .hero-grid {
             display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 3rem;
             align-items: center;
-            padding: 6rem 0 3rem;
-            background:
-                linear-gradient(90deg, rgba(255, 247, 251, 0.96), rgba(255, 247, 251, 0.68), rgba(255, 247, 251, 0.2)),
-                url("<?= htmlspecialchars($imagemMarca) ?>");
-            background-repeat: no-repeat;
-            background-position: right 8% center;
-            background-size: min(48vw, 520px) auto;
+        }
+
+        .hero-eyebrow {
+            color: var(--dourado);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            font-size: 0.82rem;
+            font-weight: 700;
         }
 
         .hero h1 {
-            color: var(--rosa);
-            font-size: clamp(2.5rem, 7vw, 5.4rem);
-            font-weight: 900;
-            line-height: 0.95;
-            letter-spacing: 0;
-            max-width: 760px;
+            color: var(--texto);
+            font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+            font-weight: 700;
+            line-height: 1.15;
+            max-width: 620px;
         }
 
-        .hero p {
-            max-width: 600px;
-            font-size: 1.12rem;
+        .hero p.lead-copy {
+            max-width: 520px;
+            font-size: 1.08rem;
+            color: var(--texto-muted);
+        }
+
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-visual-frame {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--sombra-suave);
+            aspect-ratio: 4 / 5;
+        }
+
+        .hero-visual-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hero-badge-float {
+            position: absolute;
+            left: -1.25rem;
+            bottom: -1.25rem;
+            background: var(--branco);
+            border-radius: 14px;
+            box-shadow: var(--sombra-card);
+            padding: 0.85rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            max-width: 230px;
+        }
+
+        .hero-badge-float .icon-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.16);
+            color: var(--dourado);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .hero-badge-float strong {
+            display: block;
+            font-size: 0.86rem;
+            color: var(--texto);
+        }
+
+        .hero-badge-float span {
+            display: block;
+            font-size: 0.76rem;
+            color: var(--texto-muted);
         }
 
         .btn-pink {
@@ -218,8 +299,10 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.35rem;
-            font-weight: 700;
+            gap: 0.4rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding-inline: 1.5rem;
         }
 
         .btn-pink:hover {
@@ -229,14 +312,17 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .btn-outline-pink {
-            border-color: var(--rosa);
+            border: 1.5px solid var(--rosa);
             color: var(--rosa);
+            background: transparent;
             min-height: 48px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.35rem;
-            font-weight: 700;
+            gap: 0.4rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding-inline: 1.5rem;
         }
 
         .btn-outline-pink:hover {
@@ -245,67 +331,134 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .section-title {
-            color: var(--rosa);
-            font-weight: 900;
+            color: var(--texto);
+            font-weight: 700;
+        }
+
+        .trust-bar {
+            background: var(--branco);
+            border-top: 1px solid var(--borda-suave);
+            border-bottom: 1px solid var(--borda-suave);
+            padding: 1.35rem 0;
+        }
+
+        .trust-bar-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2.25rem 2.75rem;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--texto);
+        }
+
+        .trust-item i {
+            color: var(--dourado);
+            font-size: 1.2rem;
         }
 
         .catalog-band {
-            background: #fff;
-            padding: 4rem 0;
+            background: var(--creme);
+            padding: 4.5rem 0;
         }
 
         .filter-bar {
-            background: var(--fundo);
-            border: 1px solid rgba(255, 0, 127, 0.16);
-            border-radius: 8px;
+            background: var(--branco);
+            border: 1px solid var(--borda-suave);
+            border-radius: 14px;
             padding: 1rem;
         }
 
         .form-control {
             min-height: 48px;
-            border: 2px solid rgba(255, 0, 127, 0.32);
+            border: 1.5px solid var(--borda-suave);
         }
 
         .form-control:focus {
             border-color: var(--rosa);
-            box-shadow: 0 0 0 0.25rem rgba(255, 0, 127, 0.16);
+            box-shadow: 0 0 0 0.2rem rgba(160, 66, 85, 0.14);
         }
 
         .product-card {
-            border: 1px solid rgba(255, 0, 127, 0.16);
-            border-radius: 8px;
-            background: #fff;
+            border: 1px solid var(--borda-suave);
+            border-radius: 20px;
+            background: var(--branco);
             overflow: hidden;
             height: 100%;
-            box-shadow: 0 12px 30px rgba(36, 21, 29, 0.08);
+            box-shadow: var(--sombra-card);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--sombra-suave);
         }
 
         .product-media {
-            min-height: 170px;
-            background:
-                linear-gradient(135deg, rgba(255, 0, 127, 0.1), rgba(255, 209, 102, 0.32)),
-                url("<?= htmlspecialchars($imagemMarca) ?>");
-            background-position: center;
-            background-size: contain;
-            background-repeat: no-repeat;
-            border-bottom: 1px solid rgba(255, 0, 127, 0.12);
+            aspect-ratio: 4 / 3;
+            background: var(--fundo);
+            overflow: hidden;
+        }
+
+        .product-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .product-category {
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--verde);
+            margin-bottom: 0.35rem;
+        }
+
+        .product-card h3 {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .product-desc {
+            font-size: 0.92rem;
+            color: var(--texto-muted);
         }
 
         .price-pill {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 999px;
-            background: rgba(34, 160, 107, 0.12);
-            color: #116442;
-            padding: 0.35rem 0.7rem;
-            font-weight: 800;
+            color: var(--rosa);
+            font-weight: 700;
+            font-size: 0.98rem;
+            white-space: nowrap;
+        }
+
+        .success-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(138, 154, 134, 0.2);
+            color: #4C5F49;
+            font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
         .empty-state {
-            border: 1px dashed rgba(255, 0, 127, 0.4);
-            border-radius: 8px;
-            background: var(--fundo);
+            border: 1px dashed rgba(160, 66, 85, 0.3);
+            border-radius: 16px;
+            background: var(--branco);
         }
 
         .floating-whatsapp {
@@ -321,9 +474,13 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 12px 28px rgba(37, 211, 102, 0.34);
+            box-shadow: var(--sombra-card);
             text-decoration: none;
             font-size: 1.55rem;
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
         }
 
         .floating-whatsapp:hover {
@@ -344,17 +501,28 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 12px 28px rgba(255, 0, 127, 0.34);
+            box-shadow: var(--sombra-card);
             border: none;
             font-size: 1.4rem;
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .floating-cart.is-visible,
+        .floating-whatsapp.is-visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
         }
 
         .floating-cart .cart-badge {
             position: absolute;
             top: -4px;
             right: -4px;
-            background: var(--verde);
-            color: #fff;
+            background: var(--dourado);
+            color: var(--texto);
             font-size: 0.72rem;
             font-weight: 800;
             min-width: 22px;
@@ -367,7 +535,7 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .cart-item-row {
-            border-bottom: 1px solid rgba(255, 0, 127, 0.12);
+            border-bottom: 1px solid var(--borda-suave);
             padding: 0.75rem 0;
         }
 
@@ -383,25 +551,36 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         .success-card {
-            border: 1px solid rgba(34, 160, 107, 0.35);
-            border-radius: 8px;
-            background: rgba(34, 160, 107, 0.06);
+            border: 1px solid rgba(138, 154, 134, 0.4);
+            border-radius: 16px;
+            background: rgba(138, 154, 134, 0.09);
+        }
+
+        @media (max-width: 991px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-visual {
+                order: -1;
+                max-width: 360px;
+                margin: 0 auto 2rem;
+            }
+
+            .hero p.lead-copy {
+                margin-inline: auto;
+            }
+
+            .hero-badge-float {
+                left: 0.75rem;
+                bottom: -1rem;
+            }
         }
 
         @media (max-width: 767px) {
             .hero {
-                min-height: auto;
-                padding: 5.5rem 0 2.5rem;
-                background:
-                    linear-gradient(rgba(255, 247, 251, 0.92), rgba(255, 247, 251, 0.92)),
-                    url("<?= htmlspecialchars($imagemMarca) ?>");
-                background-repeat: no-repeat;
-                background-position: center 5.2rem;
-                background-size: 72vw auto;
-            }
-
-            .hero-copy {
-                padding-top: 48vw;
+                padding: 6.5rem 0 2.5rem;
             }
         }
     </style>
@@ -421,23 +600,47 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
     <header id="topo" class="hero">
         <div class="container">
-            <div class="hero-copy">
-                <p class="fw-bold text-uppercase mb-2" style="color: var(--verde);">Doces artesanais sob encomenda</p>
-                <h1><?= htmlspecialchars($nomeMarca) ?></h1>
-                <p class="text-muted mt-3 mb-4">
-                    Bolos, docinhos e sobremesas feitos para aniversarios, eventos e aquele momento em que um doce bonito muda o dia.
-                </p>
-                <div class="d-flex flex-column flex-sm-row gap-2">
-                    <a href="#cardapio" class="btn btn-pink btn-lg">
-                        <i class="bi bi-bag-heart"></i> Escolher um doce
-                    </a>
-                    <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
-                        <i class="bi bi-whatsapp"></i> Pedir pelo WhatsApp
-                    </a>
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <p class="hero-eyebrow mb-3">Confeitaria Artesanal &amp; Fine Pastry</p>
+                    <h1 class="mb-3">Momentos inesqueciveis pedem doces inesqueciveis.</h1>
+                    <p class="lead-copy mb-4">
+                        Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
+                        <a href="#cardapio" class="btn btn-pink btn-lg">
+                            <i class="bi bi-bag-heart"></i> Explorar o Cardapio
+                        </a>
+                        <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
+                            <i class="bi bi-whatsapp"></i> Encomenda Personalizada
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-visual-frame">
+                        <img src="<?= htmlspecialchars($imagemMarca) ?>" alt="<?= htmlspecialchars($nomeMarca) ?>" loading="eager">
+                    </div>
+                    <div class="hero-badge-float">
+                        <span class="icon-circle"><i class="bi bi-award"></i></span>
+                        <div>
+                            <strong>Feito a mao</strong>
+                            <span>com ingredientes selecionados</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
+
+    <section class="trust-bar">
+        <div class="container">
+            <div class="trust-bar-inner">
+                <div class="trust-item"><i class="bi bi-flower1"></i> Ingredientes Selecionados</div>
+                <div class="trust-item"><i class="bi bi-palette2"></i> Producao 100% Artesanal</div>
+                <div class="trust-item"><i class="bi bi-box-seam"></i> Entrega Pontual e Segura</div>
+            </div>
+        </div>
+    </section>
 
     <main id="cardapio" class="catalog-band">
         <div class="container">
@@ -454,9 +657,9 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             <?php if ($resultadoPedido === 'sucesso' && $pedidoResumo): ?>
                 <div class="success-card p-4 p-md-5 mb-4" id="resumoPedidoSucesso">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <span class="price-pill" style="background: rgba(34,160,107,0.18); color:#116442;"><i class="bi bi-check-circle-fill"></i></span>
+                        <span class="success-icon"><i class="bi bi-check-circle-fill"></i></span>
                         <div>
-                            <h2 class="h4 fw-bold mb-1" style="color:#116442;">Pedido realizado com sucesso!</h2>
+                            <h2 class="h4 fw-bold mb-1" style="color:#4C5F49;">Pedido realizado com sucesso!</h2>
                             <p class="text-muted mb-0">A confeitaria recebeu sua encomenda <strong>#<?= htmlspecialchars($pedidoResumo['codigo']) ?></strong>. Confira o resumo abaixo.</p>
                         </div>
                     </div>
@@ -520,23 +723,22 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                         ?>
                         <div class="col-12 col-md-6 col-xl-4 produto-item" data-nome="<?= htmlspecialchars(strtolower($nomeProduto)) ?>">
                             <article class="product-card d-flex flex-column">
-                                <div class="product-media" role="img" aria-label="<?= htmlspecialchars($nomeProduto) ?>" style="background-image: linear-gradient(135deg, rgba(255, 0, 127, 0.08), rgba(255, 209, 102, 0.18)), url('<?= htmlspecialchars($imagemProduto) ?>'); background-size: cover;"></div>
+                                <div class="product-media">
+                                    <img src="<?= htmlspecialchars($imagemProduto) ?>" alt="<?= htmlspecialchars($nomeProduto) ?>" loading="lazy">
+                                </div>
                                 <div class="p-3 p-md-4 d-flex flex-column flex-grow-1">
+                                    <p class="product-category"><i class="bi bi-stars"></i> Doce Artesanal</p>
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-                                        <h3 class="h5 fw-bold mb-0"><?= htmlspecialchars($nomeProduto) ?></h3>
+                                        <h3 class="mb-0 font-serif"><?= htmlspecialchars($nomeProduto) ?></h3>
                                         <span class="price-pill">R$ <?= number_format($preco, 2, ',', '.') ?></span>
                                     </div>
                                     <?php if ($descricaoProduto !== ''): ?>
-                                        <p class="text-muted mb-3"><?= nl2br(htmlspecialchars($descricaoProduto)) ?></p>
+                                        <p class="product-desc mb-3"><?= nl2br(htmlspecialchars($descricaoProduto)) ?></p>
                                     <?php else: ?>
-                                        <p class="text-muted mb-3">
+                                        <p class="product-desc mb-3">
                                             Produto artesanal com rendimento aproximado de <?= intval($produto['rendimento_porcoes']) ?> porcoes.
                                         </p>
                                     <?php endif; ?>
-                                    <div class="small text-muted mb-3">
-                                        <i class="bi bi-stars"></i>
-                                        Ideal para encomendas, festas e presentes.
-                                    </div>
                                     <div class="d-flex gap-2 mt-auto">
                                         <input type="number" class="form-control" style="max-width: 78px;" min="1" max="100" value="1" id="qtd-<?= intval($produto['id']) ?>" aria-label="Quantidade">
                                         <button
@@ -546,7 +748,7 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                                             data-produto="<?= htmlspecialchars($nomeProduto) ?>"
                                             data-preco="<?= htmlspecialchars(number_format($preco, 2, ',', '.')) ?>"
                                         >
-                                            <i class="bi bi-bag-plus"></i> Adicionar ao carrinho
+                                            <i class="bi bi-bag-plus"></i> Adicionar
                                         </button>
                                     </div>
                                 </div>
@@ -683,6 +885,14 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const botoesFluantes = document.querySelectorAll('.floating-cart, .floating-whatsapp');
+        function atualizarBotoesFluantes() {
+            const mostrar = window.scrollY > 220;
+            botoesFluantes.forEach(el => el.classList.toggle('is-visible', mostrar));
+        }
+        window.addEventListener('scroll', atualizarBotoesFluantes, { passive: true });
+        atualizarBotoesFluantes();
+
         const buscaProduto = document.getElementById('buscaProduto');
         const produtos = Array.from(document.querySelectorAll('.produto-item'));
         const semResultados = document.getElementById('semResultados');
