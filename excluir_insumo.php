@@ -1,8 +1,8 @@
 <?php
 require_once 'config.php';
 
-if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf() && isset($_POST['id'])) {
+    $id = intval($_POST['id']);
     $user_id = $_SESSION['user_id'];
 
     $stmt = $pdo->prepare("DELETE FROM historico_precos WHERE estoque_id = ? AND user_id = ?");

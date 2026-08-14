@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     nome VARCHAR(120) NOT NULL,
     email VARCHAR(160) NOT NULL UNIQUE,
     whatsapp VARCHAR(40) NULL,
+    logo_marca VARCHAR(255) NULL,
     password_hash VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ativo',
     plano VARCHAR(20) NOT NULL DEFAULT 'ativo',
@@ -97,4 +98,16 @@ CREATE TABLE IF NOT EXISTS historico_precos (
     INDEX idx_historico_estoque_data (estoque_id, data_compra),
     CONSTRAINT fk_historico_estoque FOREIGN KEY (estoque_id) REFERENCES estoque(id) ON DELETE CASCADE,
     CONSTRAINT fk_historico_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_password_reset_user (user_id),
+    INDEX idx_password_reset_expires (expires_at),
+    CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

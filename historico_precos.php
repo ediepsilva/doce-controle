@@ -65,9 +65,10 @@ $historico = $stmt->fetchAll();
                 <div class="card-body">
                     <h5 class="card-title">Registrar nova compra</h5>
                     <form action="salvar_compra_insumo.php" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(doce_csrf_token()) ?>">
                         <input type="hidden" name="estoque_id" value="<?= $item['id'] ?>">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Preço de compra</label>
+                            <label class="form-label fw-bold">Valor pago na compra</label>
                             <input type="number" step="0.01" name="preco_compra" class="form-control" required>
                         </div>
                         <div class="mb-3">

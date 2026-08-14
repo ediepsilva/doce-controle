@@ -3,21 +3,12 @@ require_once 'config.php';
 $header = 'Content-Type: application/json; charset=utf-8';
 header($header);
 
-// Suporte a token de teste (APENAS para desenvolvimento).
-// Use ?test_token=DEV_receitas_token&user_id=1 para autenticar temporariamente.
-$testToken = trim((string)($_REQUEST['test_token'] ?? ''));
-$DEV_TOKEN = 'DEV_receitas_token_2026';
-$override_user_id = 0;
-if ($testToken !== '' && $testToken === $DEV_TOKEN) {
-    $override_user_id = intval($_REQUEST['user_id'] ?? 0);
-}
-
-if (!isset($_SESSION['user_id']) && !$override_user_id) {
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Usuário não autenticado. Use sessão ou token de teste.']);
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['sucesso' => false, 'mensagem' => 'Usuario nao autenticado.']);
     exit;
 }
 
-$user_id = $override_user_id ?: $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'];
 $acao = $_REQUEST['acao'] ?? '';
 
 $jsonBody = null;
@@ -128,6 +119,12 @@ switch ($acao) {
         break;
 
     case 'criar':
+        $csrfToken = (string)(obterValor('csrf_token') ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf_token($csrfToken)) {
+            http_response_code(403);
+            $response['mensagem'] = 'Token de seguranca invalido.';
+            break;
+        }
         $nome = trim(obterValor('nome_receita') ?? '');
         $rendimento = intval(obterValor('rendimento_porcoes') ?? 0);
         $preco = floatval(obterValor('preco_venda_sugerido') ?? 0);
@@ -146,6 +143,12 @@ switch ($acao) {
         break;
 
     case 'editar':
+        $csrfToken = (string)(obterValor('csrf_token') ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !doce_validar_csrf_token($csrfToken)) {
+            http_response_code(403);
+            $response['mensagem'] = 'Token de seguranca invalido.';
+            break;
+        }
         $id = intval(obterValor('id') ?? 0);
         $nome = trim(obterValor('nome_receita') ?? '');
         $rendimento = intval(obterValor('rendimento_porcoes') ?? 0);

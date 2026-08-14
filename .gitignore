@@ -11,8 +11,14 @@ __pycache__/
 *.pyc
 
 # PHP / XAMPP local
+.env
 sessions/
 uploads/
+
+# Pacotes de deploy e dumps de banco - nunca devem ir para o webroot/git
+*.zip
+banco-*.sql
+schema-infinityfree.sql
 
 # Logs e arquivos temporarios
 *.log

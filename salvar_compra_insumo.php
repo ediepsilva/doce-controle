@@ -1,9 +1,10 @@
 <?php
 require_once 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$estoque_id = intval($_POST['estoque_id'] ?? 0);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && doce_validar_csrf()) {
     $user_id = $_SESSION['user_id'];
-    $estoque_id = intval($_POST['estoque_id']);
     $preco_compra = floatval($_POST['preco_compra']);
     $quantidade_comprada = floatval($_POST['quantidade_comprada']);
     $data_compra = $_POST['data_compra'];
@@ -13,12 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$estoque_id, $user_id]);
     $item = $stmt->fetch();
 
-    if ($item && $preco_compra > 0 && $quantidade_comprada >= 0) {
+    if ($item && $preco_compra > 0 && $quantidade_comprada > 0) {
+        $preco_unitario = $preco_compra / $quantidade_comprada;
+
         $stmt = $pdo->prepare("INSERT INTO historico_precos (estoque_id, user_id, preco_compra, quantidade_comprada, data_compra, nota) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$estoque_id, $user_id, $preco_compra, $quantidade_comprada, $data_compra, $nota]);
 
         $stmt = $pdo->prepare("UPDATE estoque SET preco_unitario = ?, quantidade_atual = quantidade_atual + ? WHERE id = ? AND user_id = ?");
-        $stmt->execute([$preco_compra, $quantidade_comprada, $estoque_id, $user_id]);
+        $stmt->execute([$preco_unitario, $quantidade_comprada, $estoque_id, $user_id]);
     }
 }
 

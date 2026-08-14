@@ -2,6 +2,8 @@ body {
     position: relative;
     min-height: 100vh;
     isolation: isolate;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
 }
 
 body::before {
@@ -41,15 +43,36 @@ body > * {
 .btn-primary,
 .btn-warning,
 .btn-danger,
-.btn-info,
-.badge.bg-success,
-.badge.bg-primary,
-.badge.bg-warning,
-.badge.bg-danger,
-.badge.bg-info {
+.btn-info {
     background-color: #ff007f !important;
     border-color: #ff007f !important;
     color: #ffffff !important;
+}
+
+/* Badges de status (ex: prazo de pedidos) precisam manter as cores
+   semanticas do Bootstrap para o codigo de cores continuar legivel. */
+.badge.bg-success {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+    border-color: #0dcaf0 !important;
+    color: #212529 !important;
 }
 
 .border-success,
@@ -176,6 +199,54 @@ body > * {
     font-size: 1rem;
 }
 
+.navbar .container-fluid {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.navbar .navbar-brand {
+    margin-right: auto;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+.navbar .container-fluid > .d-flex {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-dialog {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pwa-install-button {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 1080;
+    min-height: 48px;
+    padding: 0.7rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    background: #ff007f;
+    box-shadow: 0 0.5rem 1.25rem rgba(94, 0, 47, 0.28);
+    font-weight: 700;
+}
+
+.pwa-install-button:hover,
+.pwa-install-button:focus {
+    color: #ff007f;
+    background: #fff;
+    outline: 2px solid #ff007f;
+}
+
 .table td,
 .table th {
     padding: 0.9rem;
@@ -194,5 +265,84 @@ body > * {
     body::before {
         background-size: 92vw auto;
         opacity: 0.2;
+    }
+
+    .navbar .container-fluid {
+        align-items: flex-start;
+    }
+
+    .navbar .navbar-brand {
+        width: 100%;
+    }
+
+    .navbar .container-fluid > .d-flex {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .navbar .btn {
+        flex: 1 1 auto;
+        min-height: 46px;
+    }
+
+    .container,
+    .container-fluid {
+        --bs-gutter-x: 1.25rem;
+    }
+
+    .card-body,
+    .card-footer {
+        padding: 1rem;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .pwa-install-button {
+        right: 0.75rem;
+        bottom: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .container {
+        max-width: 96%;
+    }
+
+    .navbar {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .navbar .btn,
+    .btn-lg,
+    .card-footer .btn {
+        min-height: 50px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 50px;
+    }
+
+    .table td,
+    .table th {
+        padding: 0.75rem;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .form-control,
+    .form-select,
+    .dropdown-item {
+        min-height: 48px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 1.25rem;
+        height: 1.25rem;
     }
 }
