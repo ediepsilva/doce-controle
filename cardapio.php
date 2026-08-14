@@ -100,14 +100,25 @@ function cardapio_link_whatsapp($telefone, $produto)
 
 function cardapio_imagem_produto($produto)
 {
-    global $imagemMarca;
+    static $fotosPadrao = [
+        'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1558326567-98ae2405596b?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1691782503919-6c6af4692e8f?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1587668178277-295251f900ce?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1464195244916-405fa0a82545?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1517427294546-5aa121f68e8a?w=800&q=80&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=800&q=80&auto=format&fit=crop',
+    ];
 
     $imagem = trim((string)($produto['imagem_produto'] ?? ''));
     if ($imagem !== '' && is_file(__DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $imagem))) {
         return $imagem;
     }
 
-    return $imagemMarca;
+    $indice = intval($produto['id'] ?? 0) % count($fotosPadrao);
+    return $fotosPadrao[$indice];
 }
 
 $pedidoResumo = null;
@@ -184,91 +195,22 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
             font-family: 'Playfair Display', serif;
         }
 
-        .navbar {
-            background: rgba(250, 247, 242, 0.92);
-            border-bottom: 1px solid var(--borda-suave);
-            backdrop-filter: blur(12px);
-        }
-
-        .brand-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--dourado);
-        }
-
-        .navbar-brand span {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.15rem;
-        }
-
         .hero {
             position: relative;
-            padding: 8.5rem 0 4rem;
-            background: radial-gradient(ellipse at center, var(--creme-claro) 0%, var(--creme) 62%, #F0E4D3 100%);
+            padding: 0 0 3.5rem;
+            background: var(--creme);
             overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            opacity: 0.05;
-            mix-blend-mode: multiply;
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        .hero .container {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-copy {
-            max-width: 700px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .hero-eyebrow {
-            color: var(--dourado);
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .hero h1 {
-            color: var(--texto);
-            font-size: clamp(2.2rem, 4.2vw, 3.4rem);
-            font-weight: 700;
-            line-height: 1.15;
-        }
-
-        .hero h1 em {
-            font-style: italic;
-            font-weight: 800;
-            color: var(--rosa-escuro);
-        }
-
-        .hero p.lead-copy {
-            max-width: 560px;
-            margin: 0 auto;
-            font-size: 1.08rem;
-            color: var(--texto-muted);
         }
 
         .hero-carousel-full {
             position: relative;
             width: 100%;
-            margin-top: 3rem;
         }
 
         .hero-swiper {
+            position: relative;
             width: 100%;
-            height: 500px;
+            height: 560px;
             overflow: hidden;
         }
 
@@ -282,14 +224,94 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         .hero-swiper::after {
             content: '';
             position: absolute;
-            inset: auto 0 0 0;
-            height: 40%;
-            background: linear-gradient(to top, rgba(30, 16, 10, 0.35), transparent);
+            inset: 0;
+            z-index: 1;
             pointer-events: none;
+            background: linear-gradient(180deg, rgba(15, 8, 6, 0.32) 0%, rgba(15, 8, 6, 0.42) 50%, rgba(15, 8, 6, 0.55) 100%);
+        }
+
+        .hero-brand-mark {
+            position: absolute;
+            top: 1.75rem;
+            left: 1.5rem;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .hero-brand-mark img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--dourado);
+        }
+
+        .hero-brand-mark span {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--branco);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-overlay-content {
+            position: absolute;
+            inset: 0;
             z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3.5rem 1.5rem 2rem;
+        }
+
+        .hero-copy {
+            max-width: 760px;
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .hero-eyebrow-tag {
+            display: block;
+            color: var(--dourado);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            color: var(--branco);
+            font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            font-weight: 800;
+            color: var(--dourado);
+        }
+
+        .hero p.lead-copy {
+            max-width: 520px;
+            margin: 0 auto;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-cta-band {
+            margin-top: 2.5rem;
         }
 
         .hero-swiper .swiper-pagination {
+            z-index: 3;
             bottom: 18px;
         }
 
@@ -307,6 +329,7 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
         .hero-swiper .swiper-button-prev,
         .hero-swiper .swiper-button-next {
+            z-index: 3;
             width: 40px;
             height: 40px;
             background: rgba(255, 255, 255, 0.85);
@@ -444,13 +467,6 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         .catalog-band {
             background: var(--creme);
             padding: 4.5rem 0;
-        }
-
-        .filter-bar {
-            background: var(--branco);
-            border: 1px solid var(--borda-suave);
-            border-radius: 14px;
-            padding: 1rem;
         }
 
         .form-control {
@@ -636,7 +652,7 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
 
         @media (max-width: 991px) {
             .hero-swiper {
-                height: 420px;
+                height: 460px;
             }
 
             .hero-badge-float {
@@ -646,59 +662,49 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
         }
 
         @media (max-width: 767px) {
-            .hero {
-                padding: 6.5rem 0 2.5rem;
-            }
-
-            .hero-carousel-full {
-                margin-top: 2rem;
-            }
-
             .hero-swiper {
-                height: 320px;
+                height: 420px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .hero-swiper {
+                height: 460px;
             }
 
-            .hero-badge-float {
-                position: static;
-                width: fit-content;
-                max-width: 90%;
-                margin: 1rem auto 0;
+            .hero-eyebrow-tag {
+                font-size: 0.68rem;
+            }
+
+            .hero-overlay-content {
+                padding-top: 4.5rem;
+            }
+
+            .hero-brand-mark {
+                top: 1.25rem;
+                left: 1rem;
+            }
+
+            .hero-brand-mark img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .hero-brand-mark span {
+                font-size: 0.9rem;
+            }
+
+            .hero p.lead-copy,
+            .hero-badge-float,
+            .hero-swiper .swiper-button-prev,
+            .hero-swiper .swiper-button-next {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar fixed-top">
-        <div class="container d-flex justify-content-between align-items-center gap-3">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-decoration-none" href="#topo">
-                <img src="<?= htmlspecialchars($imagemMarca) ?>" class="brand-logo" alt="Logo <?= htmlspecialchars($nomeMarca) ?>">
-                <span class="text-dark"><?= htmlspecialchars($nomeMarca) ?></span>
-            </a>
-            <a href="#cardapio" class="btn btn-outline-pink btn-sm">
-                <i class="bi bi-grid-3x3-gap"></i> Ver doces
-            </a>
-        </div>
-    </nav>
-
     <header id="topo" class="hero">
-        <div class="container">
-            <div class="hero-copy">
-                <p class="hero-eyebrow mb-3">Confeitaria Artesanal &amp; Fine Pastry</p>
-                <h1 class="mb-3">Momentos inesqueciveis pedem<br>doces <em>inesqueciveis</em>.</h1>
-                <p class="lead-copy mb-4">
-                    Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
-                </p>
-                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
-                    <a href="#cardapio" class="btn btn-pink btn-lg">
-                        <i class="bi bi-bag-heart"></i> Explorar o Cardapio
-                    </a>
-                    <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
-                        <i class="bi bi-whatsapp"></i> Encomenda Personalizada
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <div class="hero-carousel-full">
             <div class="swiper hero-swiper">
                 <div class="swiper-wrapper">
@@ -712,6 +718,22 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                         <img src="https://images.unsplash.com/photo-1691782503919-6c6af4692e8f?w=1920&q=80&auto=format&fit=crop" alt="Confeiteira polvilhando acucar de confeiteiro sobre uma torta de frutas" loading="lazy">
                     </div>
                 </div>
+
+                <div class="hero-brand-mark">
+                    <img src="<?= htmlspecialchars($imagemMarca) ?>" alt="Logo <?= htmlspecialchars($nomeMarca) ?>">
+                    <span><?= htmlspecialchars($nomeMarca) ?></span>
+                </div>
+
+                <div class="hero-overlay-content">
+                    <div class="hero-copy">
+                        <p class="hero-eyebrow-tag">Confeitaria Artesanal &amp; Fine Pastry</p>
+                        <h1 class="mb-3">Momentos inesqueciveis pedem<br>doces <em>inesqueciveis</em>.</h1>
+                        <p class="lead-copy">
+                            Bolos esculpidos, doces finos e sobremesas feitas a mao com ingredientes selecionados, pensados para o seu momento especial.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="swiper-pagination"></div>
                 <div class="swiper-button-prev"></div>
                 <div class="swiper-button-next"></div>
@@ -722,6 +744,17 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                     <strong>Feito a mao</strong>
                     <span>com ingredientes selecionados</span>
                 </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="hero-cta-band d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                <a href="#cardapio" class="btn btn-pink btn-lg">
+                    <i class="bi bi-bag-heart"></i> Explorar o Cardapio
+                </a>
+                <a href="<?= htmlspecialchars(cardapio_link_whatsapp($whatsapp, 'uma encomenda personalizada')) ?>" target="_blank" rel="noopener" class="btn btn-outline-pink btn-lg">
+                    <i class="bi bi-whatsapp"></i> Encomenda Personalizada
+                </a>
             </div>
         </div>
     </header>
@@ -787,17 +820,9 @@ if ($resultadoPedidoGet === 'sucesso' && $codigoPedidoGet !== '' && doce_coluna_
                     <?= htmlspecialchars($mensagensPedido[$resultadoPedido][1]) ?>
                 </div>
             <?php endif; ?>
-            <div class="row align-items-end g-3 mb-4">
-                <div class="col-12 col-lg-7">
-                    <h2 class="section-title mb-2">Cardapio de doces</h2>
-                    <p class="text-muted mb-0">Escolha um produto e faça sua encomenda sem precisar criar senha.</p>
-                </div>
-                <div class="col-12 col-lg-5">
-                    <div class="filter-bar">
-                        <label for="buscaProduto" class="form-label fw-bold mb-1">Buscar produto</label>
-                        <input type="search" id="buscaProduto" class="form-control" placeholder="Ex: bolo, brigadeiro, brownie">
-                    </div>
-                </div>
+            <div class="mb-4">
+                <h2 class="section-title mb-2">Cardapio de doces</h2>
+                <p class="text-muted mb-0">Escolha um produto e faça sua encomenda sem precisar criar senha.</p>
             </div>
 
             <?php if (count($produtos) === 0): ?>
