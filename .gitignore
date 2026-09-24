@@ -18,3 +18,13 @@ uploads/
 *.log
 *.tmp
 *.bak
+
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+
+# Notebooks e dependências
+.ipynb_checkpoints/
+node_modules/
+vendor/
